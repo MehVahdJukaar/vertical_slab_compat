@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "$v_slab"
+    }
+  ],
+  "result": {
+    "item": "$slab",
+    "count": 1
+  }
+}

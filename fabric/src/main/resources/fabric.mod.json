@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "v_slab_compat",
+  "version": "${version}",
+  "name": "v_slab_compat",
+  "description": "Carpet Stairs",
+  "authors": [
+    "Mehvahdjukaar"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/vertical_slabs_compat",
+    "sources": "https://github.com/MehVahdJukaar/v_slab_compat"
+  },
+  "license": "ARR",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.mehvahdjukaar.vsc.fabric.VSCFabric"
+    ]
+  },
+  "mixins": [
+    "${mod_id}.mixins.json",
+    "${mod_id}-common.mixins.json"
+  ],
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.19.2",
+    "moonlight": ">=1.19.2-2.0.35"
+  }
+}

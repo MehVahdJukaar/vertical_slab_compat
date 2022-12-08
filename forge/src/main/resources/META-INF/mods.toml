@@ -1,0 +1,53 @@
+
+modLoader="javafml" #mandatory
+
+loaderVersion="[40,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+
+license="All rights reserved"
+
+[[mods]] #mandatory
+
+modUrl = "https://www.curseforge.com/minecraft/mc-mods/vertical_slabs_compat"
+
+modId= "v_slab_compat" #mandatory
+
+version = "${version}"
+
+displayName="Vertical Slabs Compat" #mandatory
+
+logoFile="icon.png" #optional
+
+credits="MehVahdJukaar" #optional
+
+authors="MehVahdJukaar" #optional
+
+itemIcon="minecraft:purple_carpet" #catalogue icon
+description='''
+Automatic Vertical Slabs
+'''
+
+[[dependencies.v_slab_compat]] #optional
+    # the modid of the dependency
+    modId="forge" #mandatory
+
+    mandatory=true #mandatory
+
+    versionRange="[40,)" #mandatory
+
+    ordering="NONE"
+    side="BOTH"
+# Here's another dependency
+[[dependencies.v_slab_compat]]
+    modId="minecraft"
+    mandatory=true
+# This version range declares a minimum of the current minecraft version up to but not including the next major version
+    versionRange="[1.19.2,1.20)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.v_slab_compat]]
+
+    modId="moonlight"
+    mandatory=true
+    versionRange="[1.19.2-2.0.35,]"
+    side="BOTH"

@@ -1,0 +1,9 @@
+{
+    "parent": "v_slab_compat:block/vertical_slab",
+    "textures": {
+        "bottom": "$texture",
+        "top": "$texture",
+        "side": "$texture",
+        "back": "$texture"
+    }
+}
