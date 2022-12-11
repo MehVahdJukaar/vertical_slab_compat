@@ -5,6 +5,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodTypeRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -47,7 +48,7 @@ public class CutBlockType extends BlockType {
         list.add(this.id.getNamespace());
         list.addAll(VSC.VERTICAL_SLABS_MODS);
         for (var s : list) {
-            var o = Registry.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_vertical_slab"));
+            var o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_vertical_slab"));
             if (o.isPresent()) {
                 this.addChild("vertical_slab", (Object) o.get());
                 break;

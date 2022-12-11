@@ -10,6 +10,8 @@ import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.dynamicpack.ClientDynamicResourcesHandler;
 import net.mehvahdjukaar.vsc.dynamicpack.ServerDynamicResourcesHandler;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -44,11 +46,11 @@ public class VSC {
         BlockSetAPI.registerBlockSetDefinition(new CutBlockTypeRegistry("cut_blocK_type"));
 
         BlockSetAPI.addDynamicBlockRegistration(VSC::registerVerticalSlab, CutBlockType.class);
-        BlockSetAPI.addDynamicRegistration(VSC::registerItems, CutBlockType.class, Registry.ITEM);
+        BlockSetAPI.addDynamicItemRegistration(VSC::registerItems, CutBlockType.class);
 
         ServerDynamicResourcesHandler.INSTANCE.register();
 
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatformHelper.getPhysicalSide().isClient()) {
             ClientDynamicResourcesHandler.INSTANCE.register();
 
         }
@@ -59,7 +61,7 @@ public class VSC {
             var type = v.getKey();
             var block = v.getValue();
             Item i;
-            var prop = new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS);
+            var prop = new Item.Properties();
             if (type.getWoodType() != null) {
                 i = new WoodBasedBlockItem(block, prop, type.getWoodType(), 150);
             } else {

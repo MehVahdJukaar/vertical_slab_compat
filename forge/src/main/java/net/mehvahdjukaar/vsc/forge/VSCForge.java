@@ -16,7 +16,7 @@ public class VSCForge {
     public VSCForge() {
         VSC.commonInit();
 
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatformHelper.getPhysicalSide().isClient()) {
             VSCClient.init();
         }
         MinecraftForge.EVENT_BUS.register(this);

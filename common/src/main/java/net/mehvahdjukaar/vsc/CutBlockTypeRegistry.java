@@ -5,6 +5,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -37,10 +38,10 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
         }
         if (name != null && !baseRes.getNamespace().equals("securitycraft")) {
             ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
-            var o = Registry.BLOCK.getOptional(id);
+            var o = BuiltInRegistries.BLOCK.getOptional(id);
             if (o.isEmpty())
-                o = Registry.BLOCK.getOptional(new ResourceLocation(id.getNamespace(), id.getPath() + "_planks"));
-            if (o.isEmpty()) o = Registry.BLOCK.getOptional(new ResourceLocation(name));
+                o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(id.getNamespace(), id.getPath() + "_planks"));
+            if (o.isEmpty()) o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(name));
             if (o.isPresent() && block instanceof SlabBlock && hasRightShapeHack(block)) {
                 return Optional.of(new CutBlockType(id, o.get(), block));
             }
