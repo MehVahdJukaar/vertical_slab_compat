@@ -54,15 +54,14 @@ public class CutBlockType extends BlockType {
             }
         }
         this.woodType = getEarlyWoodType();
+        if(woodType != null){
+            woodType.addChild("quark:vertical_slab", this.getChild("vertical_slab"));
+        }
     }
 
     @Nullable
     private WoodType getEarlyWoodType() {
-        //return BlockSetAPI.getBlockTypeOf(base, WoodType.class);
-        for(var v : WoodTypeRegistry.getTypes()) {
-            if(v.planks==this.base)return v;
-        }
-        return null;
+        return BlockSetAPI.getBlockTypeOf(base, WoodType.class);
     }
 
     @Override

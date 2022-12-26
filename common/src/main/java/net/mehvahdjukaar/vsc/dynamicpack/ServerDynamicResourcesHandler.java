@@ -55,10 +55,17 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
                 VSC.LOGGER.error("Failed to generate recipes for template at location {} ", res);
             }
         });
+        addTags();
 
         addBlocksLootTable(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
+    }
 
+    @Override
+    public void generateStaticAssetsOnStartup(ResourceManager manager) {
+        addTags();
+    }
 
+    private void addTags() {
         SimpleTagBuilder tag = SimpleTagBuilder.of(VSC.res("vertical_slabs"));
         tag.addEntries(VSC.VERTICAL_SLABS_ITEMS.values());
         dynamicPack.addTag(tag, Registry.BLOCK_REGISTRY);
@@ -68,25 +75,25 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
         quarkTag.addTag(tag);
         quarkWoodenTag.addEntries(VSC.VERTICAL_SLABS_ITEMS.entrySet().stream()
                 .filter(t -> t.getKey().getWoodType() != null).map(Map.Entry::getValue).toList());
-        dynamicPack.addTag(tag, Registry.BLOCK_REGISTRY);
-        dynamicPack.addTag(tag, Registry.ITEM_REGISTRY);
-
+        dynamicPack.addTag(quarkTag, Registry.BLOCK_REGISTRY);
+        dynamicPack.addTag(quarkTag, Registry.ITEM_REGISTRY);
+        dynamicPack.addTag(quarkWoodenTag, Registry.BLOCK_REGISTRY);
+        dynamicPack.addTag(quarkWoodenTag, Registry.ITEM_REGISTRY);
     }
 
-    private void addBlocksLootTable(ResourceManager manager, ResourceLocation templateRecipe) {
-        var template = StaticResource.getOrFail(manager, templateRecipe);
+    private void addBlocksLootTable(ResourceManager manager, ResourceLocation templateLootTable) {
+        var template = StaticResource.getOrFail(manager, templateLootTable);
 
         VSC.VERTICAL_SLABS.forEach((w, i) -> {
             String fullText = new String(template.data, StandardCharsets.UTF_8);
 
-            fullText = fullText.replace("$v_slab", Utils.getID(w.getChild("vertical_slab")).toString());
+            fullText = fullText.replace("$v_slab", Utils.getID(i).toString());
 
             String id = template.location.toString();
             id = id.replace("template/loot_table", "loot_tables/" + i.getLootTable().getPath());
             this.dynamicPack.addResource(StaticResource.create(fullText.getBytes(), new ResourceLocation(id)));
         });
     }
-
 
     private void addBlocksRecipes(ResourceManager manager, ResourceLocation templateRecipe) {
         var template = StaticResource.getOrFail(manager, templateRecipe);
@@ -109,11 +116,6 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
 
     private boolean isSlabEnabled(CutBlockType w, Item i) {
         return i.getItemCategory() != null;
-    }
-
-    @Override
-    public void generateStaticAssetsOnStartup(ResourceManager manager) {
-
     }
 
 
