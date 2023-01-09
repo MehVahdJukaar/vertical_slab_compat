@@ -41,7 +41,7 @@ public class VSC {
     public static final Map<CutBlockType, Item> VERTICAL_SLABS_ITEMS = new Object2ObjectArrayMap<>();
 
     public static void commonInit() {
-        BlockSetAPI.registerBlockSetDefinition(new CutBlockTypeRegistry("cut_blocK_type"));
+        BlockSetAPI.registerBlockSetDefinition(new CutBlockTypeRegistry("cut_block_type"));
 
         BlockSetAPI.addDynamicBlockRegistration(VSC::registerVerticalSlab, CutBlockType.class);
         BlockSetAPI.addDynamicRegistration(VSC::registerItems, CutBlockType.class, Registry.ITEM);

@@ -29,19 +29,21 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
     public Optional<CutBlockType> detectTypeFromBlock(Block block, ResourceLocation baseRes) {
         String name = null;
         String path = baseRes.getPath();
-        //needs to contain planks in its name
         if (path.endsWith("_slab") && !path.endsWith("_vertical_slab")) {
             name = path.substring(0, path.length() - "_slab".length());
         } else if (path.startsWith("slab_")) {
             name = path.substring("slab_".length());
         }
-        if (name != null && !baseRes.getNamespace().equals("securitycraft")) {
-            ResourceLocation id = new ResourceLocation(baseRes.getNamespace(), name);
+        String namespace = baseRes.getNamespace();
+        if (name != null && block instanceof SlabBlock && !namespace.equals("securitycraft")) {
+            ResourceLocation id = new ResourceLocation(namespace, name);
             var o = Registry.BLOCK.getOptional(id);
             if (o.isEmpty())
-                o = Registry.BLOCK.getOptional(new ResourceLocation(id.getNamespace(), id.getPath() + "_planks"));
+                o = Registry.BLOCK.getOptional(new ResourceLocation(namespace, name + "s"));
+            if (o.isEmpty())
+                o = Registry.BLOCK.getOptional(new ResourceLocation(namespace, name + "_planks"));
             if (o.isEmpty()) o = Registry.BLOCK.getOptional(new ResourceLocation(name));
-            if (o.isPresent() && block instanceof SlabBlock && hasRightShapeHack(block)) {
+            if (o.isPresent() && hasRightShapeHack(block)) {
                 return Optional.of(new CutBlockType(id, o.get(), block));
             }
         }
