@@ -50,6 +50,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
                         var n = d + "_" + finalName.replace("_" + d, "");
                         parent = Registry.BLOCK.getOptional(new ResourceLocation(n));
                         if (parent.isPresent()) id = new ResourceLocation("absentbydesign", n);
+                        break;
                     }
                 }
                 name = name.replace("bricks_cracked", "cracked_stone_bricks");
