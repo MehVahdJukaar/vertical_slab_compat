@@ -9,6 +9,7 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.dynamicpack.ClientDynamicResourcesHandler;
 import net.mehvahdjukaar.vsc.dynamicpack.ServerDynamicResourcesHandler;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -22,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Author: MehVahdJukaar
@@ -35,7 +37,9 @@ public class VSC {
         return new ResourceLocation(MOD_ID, name);
     }
 
-    public static final List<String> VERTICAL_SLABS_MODS = List.of("quark", "buildersaddition", "compatoplenty", "everycomp");
+    public static final List<String> VERTICAL_SLABS_MODS = Stream.of("quark", "buildersaddition", "compatoplenty", "everycomp")
+            .filter(PlatformHelper::isModLoaded).toList();
+
 
     public static final Map<CutBlockType, VerticalSlabBlock> VERTICAL_SLABS = new Object2ObjectArrayMap<>();
     public static final Map<CutBlockType, Item> VERTICAL_SLABS_ITEMS = new Object2ObjectArrayMap<>();
