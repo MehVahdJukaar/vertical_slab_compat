@@ -52,8 +52,3 @@ Automatic Vertical Slabs
     versionRange="[1.20-2.5.0,]"
     side="BOTH"
 
-[[dependencies.v_slab_compat]]
-    modId="quark"
-    mandatory=true
-    versionRange="[0,]"
-    side="BOTH"

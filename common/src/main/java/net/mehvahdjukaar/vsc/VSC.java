@@ -9,16 +9,17 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.dynamicpack.ClientDynamicResourcesHandler;
 import net.mehvahdjukaar.vsc.dynamicpack.ServerDynamicResourcesHandler;
-import net.minecraft.core.Registry;
+import net.mehvahdjukaar.vsc.temp.QuarkCompat;
+import net.mehvahdjukaar.vsc.temp.TempVerticalSlabBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,6 +33,7 @@ public class VSC {
 
     public static final String MOD_ID = "v_slab_compat";
     public static final Logger LOGGER = LogManager.getLogger();
+    public static final boolean QUARK = PlatHelper.isModLoaded("quark");
 
     public static ResourceLocation res(String name) {
         return new ResourceLocation(MOD_ID, name);
@@ -41,7 +43,7 @@ public class VSC {
             .filter(PlatHelper::isModLoaded).toList();
 
 
-    public static final Map<CutBlockType, CompatVerticalSlab> VERTICAL_SLABS = new Object2ObjectOpenHashMap<>();
+    public static final Map<CutBlockType, Block> VERTICAL_SLABS = new Object2ObjectOpenHashMap<>();
     public static final Map<CutBlockType, Item> VERTICAL_SLABS_ITEMS = new Object2ObjectOpenHashMap<>();
 
     public static void commonInit() {
@@ -84,16 +86,21 @@ public class VSC {
             String name = type.getTypeName() + "_vertical_slab";
             ResourceLocation newId = res(type.getNamespace().equals("minecraft") ? name : type.getNamespace() + "/" + name);
 
-            CompatVerticalSlab block = new CompatVerticalSlab(Utils.copyPropertySafe(type.base), type);
+            Block block = createVSlab(type);
             blockRegistrator.register(newId, block);
             VERTICAL_SLABS.put(type, block);
-            type.addChild("vertical_slab",  block);
+            type.addChild("vertical_slab", block);
         }
     }
 
+    @NotNull
+    private static Block createVSlab(CutBlockType type) {
+        return QUARK ? QuarkCompat.createVSlab(type) : new TempVerticalSlabBlock(Utils.copyPropertySafe(type.base), type);
+    }
+
     private static void addItemsToTabs(RegHelper.ItemToTabEvent event) {
-        for(var v : VERTICAL_SLABS_ITEMS.entrySet()){
-            event.addAfter(CreativeModeTabs.BUILDING_BLOCKS, i->i.is(v.getKey().slab.asItem()), v.getValue());
+        for (var v : VERTICAL_SLABS_ITEMS.entrySet()) {
+            event.addAfter(CreativeModeTabs.BUILDING_BLOCKS, i -> i.is(v.getKey().slab.asItem()), v.getValue());
         }
     }
 

@@ -13,7 +13,7 @@ import org.violetmoon.quark.content.building.block.VerticalSlabBlock;
 
 import java.util.List;
 
-public class CompatVerticalSlab extends VerticalSlabBlock {
+public class CompatVerticalSlab extends VerticalSlabBlock   {
     private final CutBlockType blockType;
     private final BlockState mimic;
 

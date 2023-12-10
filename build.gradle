@@ -51,12 +51,12 @@ subprojects {
                 dependencies {
                     required.project "fabric-api"
                     required.project "moonlight"
-                    required.project "quark"
+                    optional.project "quark"
                 }
             } else {
                 dependencies {
                     required.project "moonlight"
-                    required.project "quark"
+                    optional.project "quark"
                 }
             }
         }
@@ -78,12 +78,12 @@ subprojects {
                     relations {
                         requiredDependency "fabric-api"
                         requiredDependency "selene"
-                        requiredDependency "quark"
+                        optionalDependency "quark"
                     }
                 } else {
                     relations {
                         requiredDependency("selene")
-                        requiredDependency("quark")
+                        optionalDependency("quark")
 
                     }
                 }
