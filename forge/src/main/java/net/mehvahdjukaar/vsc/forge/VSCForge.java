@@ -14,11 +14,6 @@ public class VSCForge {
 
     public VSCForge() {
         VSC.commonInit();
-
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            VSCClient.init();
-        }
-        MinecraftForge.EVENT_BUS.register(this);
     }
     
 }

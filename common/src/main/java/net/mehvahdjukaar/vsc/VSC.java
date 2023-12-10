@@ -45,6 +45,9 @@ public class VSC {
     public static final Map<CutBlockType, Item> VERTICAL_SLABS_ITEMS = new Object2ObjectOpenHashMap<>();
 
     public static void commonInit() {
+        if (PlatHelper.getPhysicalSide().isClient()) {
+            VSCClient.init();
+        }
         BlockSetAPI.registerBlockSetDefinition(new CutBlockTypeRegistry("cut_block_type"));
 
         BlockSetAPI.addDynamicBlockRegistration(VSC::registerVerticalSlab, CutBlockType.class);
