@@ -1,12 +1,12 @@
 package net.mehvahdjukaar.vsc;
 
 import net.mehvahdjukaar.moonlight.api.misc.EventCalled;
-import net.mehvahdjukaar.moonlight.api.platform.ClientPlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.ClientHelper;
 
 public class VSCClient {
 
     public static void init() {
-        ClientPlatformHelper.addBlockColorsRegistration(VSCClient::registerBlockColors);
+        ClientHelper.addBlockColorsRegistration(VSCClient::registerBlockColors);
 
     }
 
@@ -14,7 +14,7 @@ public class VSCClient {
     }
 
     @EventCalled
-    private static void registerBlockColors(ClientPlatformHelper.BlockColorEvent event) {
+    private static void registerBlockColors(ClientHelper.BlockColorEvent event) {
     }
 
 }

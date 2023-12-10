@@ -2,13 +2,11 @@ package net.mehvahdjukaar.vsc.dynamicpack;
 
 import com.google.gson.JsonElement;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesProvider;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.VSC;
@@ -36,11 +34,6 @@ public class ClientDynamicResourcesHandler extends DynClientResourcesGenerator {
     @Override
     public boolean dependsOnLoadedPacks() {
         return true;
-    }
-
-    @Override
-    public void generateStaticAssetsOnStartup(ResourceManager manager) {
-
     }
 
     @Override

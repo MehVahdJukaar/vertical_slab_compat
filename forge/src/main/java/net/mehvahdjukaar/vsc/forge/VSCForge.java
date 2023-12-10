@@ -1,11 +1,10 @@
 package net.mehvahdjukaar.vsc.forge;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.vsc.VSC;
 import net.mehvahdjukaar.vsc.VSCClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 /**
  * Author: MehVahdJukaar
@@ -16,7 +15,7 @@ public class VSCForge {
     public VSCForge() {
         VSC.commonInit();
 
-        if (PlatformHelper.getEnv().isClient()) {
+        if (PlatHelper.getPhysicalSide().isClient()) {
             VSCClient.init();
         }
         MinecraftForge.EVENT_BUS.register(this);

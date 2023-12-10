@@ -1,18 +1,15 @@
 package net.mehvahdjukaar.vsc;
 
-import dev.architectury.injectables.annotations.PlatformOnly;
-import net.mehvahdjukaar.moonlight.api.block.VerticalSlabBlock;
 import net.mehvahdjukaar.moonlight.api.platform.ForgeHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import org.violetmoon.quark.content.building.block.VerticalSlabBlock;
 
 import java.util.List;
 
@@ -21,7 +18,7 @@ public class CompatVerticalSlab extends VerticalSlabBlock {
     private final BlockState mimic;
 
     public CompatVerticalSlab(Properties properties, CutBlockType type) {
-        super(properties);
+        super(() -> type.base, properties);
         this.blockType = type;
         this.mimic = blockType.slab.defaultBlockState();
     }
@@ -31,9 +28,9 @@ public class CompatVerticalSlab extends VerticalSlabBlock {
     }
 
     @Override
-    public List<ItemStack> getDrops(BlockState state, LootContext.Builder builder) {
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         if (builder.getOptionalParameter(LootContextParams.THIS_ENTITY) instanceof ServerPlayer player) {
-            if (ForgeHelper.canHarvestBlock(mimic, builder.getLevel(), new BlockPos(builder.getParameter(LootContextParams.ORIGIN)), player)) {
+            if (ForgeHelper.canHarvestBlock(mimic, builder.getLevel(), BlockPos.containing(builder.getParameter(LootContextParams.ORIGIN)), player)) {
                 return super.getDrops(state, builder);
             }
         }
@@ -44,7 +41,5 @@ public class CompatVerticalSlab extends VerticalSlabBlock {
     public float getDestroyProgress(BlockState state, Player player, BlockGetter worldIn, BlockPos pos) {
         return mimic.getDestroyProgress(player, worldIn, pos);
     }
-
-
 
 }

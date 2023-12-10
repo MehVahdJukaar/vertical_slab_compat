@@ -103,7 +103,10 @@ dependencies {
     implementation 'org.jetbrains:annotations:22.0.0'
 
     modImplementation("net.mehvahdjukaar:moonlight-forge:${project.moonlight_version}")
-    modImplementation ("curse.maven:jei-238222:3884337")
+    modImplementation("org.violetmoon.quark:Quark-4.0-alpha-419")
+
+    modCompileOnly ("curse.maven:jei-238222:3884337")
    // modImplementation ("curse.maven:configured-457570:4011355")
-    modImplementation ("curse.maven:absent-by-design-305840:3835331")
+    modImplementation ("curse.maven:absent-by-design-305840:4616702")
+    modImplementation ("curse.maven:flib-661261:4724762")
 }

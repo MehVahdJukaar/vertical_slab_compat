@@ -5,6 +5,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
@@ -41,14 +42,14 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
         String namespace = baseRes.getNamespace();
         if (name != null && block instanceof SlabBlock && !namespace.equals("securitycraft")) {
             ResourceLocation id = new ResourceLocation(namespace, name);
-            var parent = Registry.BLOCK.getOptional(id);
+            var parent = BuiltInRegistries.BLOCK.getOptional(id);
 
             if (parent.isEmpty() && namespace.equals("absentbydesign")) {
                 String finalName = name.replace("silver", "light_gray");
                 for (var d : dyes) {
                     if (finalName.contains(d)) {
                         var n = d + "_" + finalName.replace("_" + d, "");
-                        parent = Registry.BLOCK.getOptional(new ResourceLocation(n));
+                        parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(n));
                         if (parent.isPresent()) id = new ResourceLocation("absentbydesign", n);
                         break;
                     }
@@ -57,10 +58,10 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
 
             }
             if (parent.isEmpty())
-                parent = Registry.BLOCK.getOptional(new ResourceLocation(namespace, name + "s"));
+                parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(namespace, name + "s"));
             if (parent.isEmpty())
-                parent = Registry.BLOCK.getOptional(new ResourceLocation(namespace, name + "_planks"));
-            if (parent.isEmpty()) parent = Registry.BLOCK.getOptional(new ResourceLocation(name));
+                parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(namespace, name + "_planks"));
+            if (parent.isEmpty()) parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(name));
             if (parent.isPresent() && hasRightShapeHack(block)) {
                 return Optional.of(new CutBlockType(id, parent.get(), block));
             }
@@ -73,7 +74,6 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
         Stopwatch watch = Stopwatch.createStarted();
         super.buildAll();
         VSC.LOGGER.info("Initialized slab sets in: {} ms", watch.elapsed().toMillis());
-
     }
 
     @Contract

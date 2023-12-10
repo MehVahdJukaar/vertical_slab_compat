@@ -3,7 +3,7 @@ package net.mehvahdjukaar.vsc;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -40,22 +40,22 @@ public class CutBlockType extends BlockType {
 
     @Override
     public void initializeChildrenBlocks() {
-        this.addChild("base", (Object) base);
-        this.addChild("slab", (Object) slab);
+        this.addChild("base", base);
+        this.addChild("slab", slab);
         List<String> list = new ArrayList<>();
         list.add(this.id.getNamespace());
         list.addAll(VSC.VERTICAL_SLABS_MODS);
         boolean first = true;
         for (var s : list) {
-            var o = Registry.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_vertical_slab"));
+            var o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_vertical_slab"));
             if (o.isPresent()) {
-                this.addChild("vertical_slab", (Object) o.get());
+                this.addChild("vertical_slab", o.get());
                 break;
             }
-            if(first) {
-                o = Registry.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_slab_vert"));
+            if (first) {
+                o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_slab_vert"));
                 if (o.isPresent()) {
-                    this.addChild("vertical_slab", (Object) o.get());
+                    this.addChild("vertical_slab", o.get());
                     break;
                 }
             }

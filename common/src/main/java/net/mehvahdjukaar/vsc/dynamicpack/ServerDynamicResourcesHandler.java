@@ -1,17 +1,18 @@
 package net.mehvahdjukaar.vsc.dynamicpack;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatformHelper;
+import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynServerResourcesProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynServerResourcesGenerator;
 import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicDataPack;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.CutBlockType;
 import net.mehvahdjukaar.vsc.VSC;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 
-public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
+public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
 
     public static final ServerDynamicResourcesHandler INSTANCE = new ServerDynamicResourcesHandler();
 
@@ -31,7 +32,7 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
         getPack().addNamespaces("minecraft");
         getPack().addNamespaces("forge");
         getPack().addNamespaces("quark");
-        this.dynamicPack.generateDebugResources = PlatformHelper.isDev();
+        this.dynamicPack.setGenerateDebugResources(PlatHelper.isDev());
 
         this.recipeLocations = Set.of("recipe", "recipe_2", "recipe_stonecutter");
     }
@@ -48,6 +49,7 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
 
     @Override
     public void regenerateDynamicAssets(ResourceManager manager) {
+        addTags();
         this.recipeLocations.forEach(res -> {
             try {
                 addBlocksRecipes(manager, ResType.GENERIC.getPath(VSC.res("template/" + res + ".json")));
@@ -60,25 +62,20 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
         addBlocksLootTable(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
     }
 
-    @Override
-    public void generateStaticAssetsOnStartup(ResourceManager manager) {
-        addTags();
-    }
-
     private void addTags() {
         SimpleTagBuilder tag = SimpleTagBuilder.of(VSC.res("vertical_slabs"));
         tag.addEntries(VSC.VERTICAL_SLABS_ITEMS.values());
-        dynamicPack.addTag(tag, Registry.BLOCK_REGISTRY);
-        dynamicPack.addTag(tag, Registry.ITEM_REGISTRY);
+        dynamicPack.addTag(tag, Registries.BLOCK);
+        dynamicPack.addTag(tag, Registries.ITEM);
         SimpleTagBuilder quarkTag = SimpleTagBuilder.of(new ResourceLocation("quark:vertical_slabs"));
         SimpleTagBuilder quarkWoodenTag = SimpleTagBuilder.of(new ResourceLocation("quark:wooden_vertical_slabs"));
         quarkTag.addTag(tag);
         quarkWoodenTag.addEntries(VSC.VERTICAL_SLABS_ITEMS.entrySet().stream()
                 .filter(t -> t.getKey().getWoodType() != null).map(Map.Entry::getValue).toList());
-        dynamicPack.addTag(quarkTag, Registry.BLOCK_REGISTRY);
-        dynamicPack.addTag(quarkTag, Registry.ITEM_REGISTRY);
-        dynamicPack.addTag(quarkWoodenTag, Registry.BLOCK_REGISTRY);
-        dynamicPack.addTag(quarkWoodenTag, Registry.ITEM_REGISTRY);
+        dynamicPack.addTag(quarkTag, Registries.BLOCK);
+        dynamicPack.addTag(quarkTag, Registries.ITEM);
+        dynamicPack.addTag(quarkWoodenTag, Registries.BLOCK);
+        dynamicPack.addTag(quarkWoodenTag, Registries.ITEM);
     }
 
     private void addBlocksLootTable(ResourceManager manager, ResourceLocation templateLootTable) {
@@ -115,7 +112,7 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesProvider {
     }
 
     private boolean isSlabEnabled(CutBlockType w, Item i) {
-        return i.getItemCategory() != null;
+        return true;
     }
 
 

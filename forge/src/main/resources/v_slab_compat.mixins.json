@@ -6,7 +6,6 @@
   "client": [
   ],
   "mixins": [
-    "SelfVerticalSlabMixin"
   ],
   "injectors": {
     "defaultRequire": 1
