@@ -37,6 +37,8 @@ public class CompatVerticalSlab extends VerticalSlabBlock   {
         return List.of();
     }
 
+
+
     @Override
     public float getDestroyProgress(BlockState state, Player player, BlockGetter worldIn, BlockPos pos) {
         return mimic.getDestroyProgress(player, worldIn, pos);

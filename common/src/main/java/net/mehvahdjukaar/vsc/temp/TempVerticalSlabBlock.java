@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 /**
+ * All credits to Vazkii and Quark
  * Base extensible class in case mods want to add their own slabs
  */
 public class TempVerticalSlabBlock extends Block implements SimpleWaterloggedBlock {
