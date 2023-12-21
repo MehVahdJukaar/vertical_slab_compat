@@ -16,13 +16,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.FallbackResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -100,6 +100,23 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
     }
 
     private <T> void copyTags(ResourceManager manager, TagKey<T> tagKey, ResourceKey<Registry<T>> registry) {
+        Set<String> tagValues = getTags(manager, tagKey);
+
+        SimpleTagBuilder builer = SimpleTagBuilder.of(tagKey);
+        for (var e : VSC.VERTICAL_SLABS_ITEMS.entrySet()) {
+            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(e.getKey().slab);
+            if (tagValues.contains(id.toString())) {
+                builer.addEntry(e.getValue());
+            }
+        }
+        var b = builer.build();
+        if (!b.isEmpty()) {
+            dynamicPack.addTag(builer, registry);
+        }
+    }
+
+    @NotNull
+    private static <T> Set<String> getTags(ResourceManager manager, TagKey<T> tagKey) {
         var resources = manager.getResourceStack(ResType.TAGS.getPath(tagKey.location().withPrefix(tagKey.registry().location().getPath() + "s/")));
         Set<String> tagValues = new HashSet<>();
         for (var r : resources) {
@@ -111,17 +128,16 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
                 throw new RuntimeException(e);
             }
         }
-        SimpleTagBuilder builer = SimpleTagBuilder.of(tagKey);
-        for (var e : VSC.VERTICAL_SLABS_ITEMS.entrySet()) {
-            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(e.getKey().slab);
-            if (tagValues.contains(id.toString())) {
-                builer.add(id);
+        for (var s : tagValues) {
+            if (s.startsWith("#")) {
+                var res = new ResourceLocation(s.substring(1));
+                if (res.getPath().contains("slab")) {
+                    TagKey<T> newKey = TagKey.create(tagKey.registry(), res);
+                    tagValues.addAll(getTags(manager, newKey));
+                }
             }
         }
-        var b = builer.build();
-        if (!b.isEmpty()) {
-            dynamicPack.addTag(builer, registry);
-        }
+        return tagValues;
     }
 
     private void addBlocksLootTable(ResourceManager manager, ResourceLocation templateLootTable) {
