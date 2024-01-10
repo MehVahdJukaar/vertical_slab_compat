@@ -59,7 +59,6 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
 
     @Override
     public void regenerateDynamicAssets(ResourceManager manager) {
-        addTags(manager);
         this.recipeLocations.forEach(res -> {
             try {
                 addBlocksRecipes(manager, ResType.GENERIC.getPath(VSC.res("template/" + res + ".json")));
@@ -69,6 +68,9 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
         });
 
         addBlocksLootTable(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
+
+        addTags(manager);
+
     }
 
     private void addTags(ResourceManager manager) {
@@ -119,6 +121,7 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
     private static <T> Set<String> getTags(ResourceManager manager, TagKey<T> tagKey) {
         var resources = manager.getResourceStack(ResType.TAGS.getPath(tagKey.location().withPrefix(tagKey.registry().location().getPath() + "s/")));
         Set<String> tagValues = new HashSet<>();
+        Set<String> actualTags = new HashSet<>();
         for (var r : resources) {
             try (var res = r.open()) {
                 RPUtils.deserializeJson(res).getAsJsonArray("values")
@@ -133,11 +136,11 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
                 var res = new ResourceLocation(s.substring(1));
                 if (res.getPath().contains("slab")) {
                     TagKey<T> newKey = TagKey.create(tagKey.registry(), res);
-                    tagValues.addAll(getTags(manager, newKey));
+                    actualTags.addAll(getTags(manager, newKey));
                 }
-            }
+            }else actualTags.add(s);
         }
-        return tagValues;
+        return actualTags;
     }
 
     private void addBlocksLootTable(ResourceManager manager, ResourceLocation templateLootTable) {
