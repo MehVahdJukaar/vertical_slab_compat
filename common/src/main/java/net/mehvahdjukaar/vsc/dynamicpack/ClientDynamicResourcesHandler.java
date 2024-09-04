@@ -64,7 +64,7 @@ public class ClientDynamicResourcesHandler extends DynClientResourcesGenerator {
                         name -> name.replace("vertical_slab_template", id.getPath()));
 
             } catch (Exception ex) {
-                VSC.LOGGER.error("Failed to generate assets for {}", e.getValue(), ex);
+                VSC.LOGGER.error("Failed to generate assets for {}", e.getValue());
             }
         }
 

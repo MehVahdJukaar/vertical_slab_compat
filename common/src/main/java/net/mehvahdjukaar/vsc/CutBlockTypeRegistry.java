@@ -30,6 +30,8 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
     private final List<String> dyes = Arrays.stream(DyeColor.values()).map(DyeColor::getName)
             .sorted(Comparator.comparingInt(String::length)).sorted(Collections.reverseOrder()).toList();
 
+    private final Set<String> blacklist = Set.of("securitycraft", "betterend", "betternether");
+
     @Override
     public Optional<CutBlockType> detectTypeFromBlock(Block block, ResourceLocation baseRes) {
         String name = null;
@@ -40,7 +42,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
             name = path.substring("slab_".length());
         }
         String namespace = baseRes.getNamespace();
-        if (name != null && block instanceof SlabBlock && !namespace.equals("securitycraft")) {
+        if (name != null && block instanceof SlabBlock && !blacklist.contains(namespace)) {
             ResourceLocation id = new ResourceLocation(namespace, name);
             var parent = BuiltInRegistries.BLOCK.getOptional(id);
 

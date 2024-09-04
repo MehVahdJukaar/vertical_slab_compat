@@ -177,7 +177,8 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
     }
 
     private boolean isSlabEnabled(CutBlockType w, Item i) {
-        return true;
+        String namespace = w.getNamespace();
+        return !VSC.BLACKLIST.get().contains(namespace);
     }
 
 

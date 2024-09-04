@@ -18,7 +18,8 @@ public class VSCClient {
         for(var e : VSC.VERTICAL_SLABS.entrySet()){
             Block value = e.getValue();
             Block slab = e.getKey().slab;
-            event.register((blockState, blockAndTintGetter, blockPos, i) -> event.getColor(slab.defaultBlockState(),blockAndTintGetter, blockPos, i), value);
+            event.register((blockState, blockAndTintGetter, blockPos, i) ->
+                    event.getColor(slab.defaultBlockState(),blockAndTintGetter, blockPos, i), value);
         }
     }
 

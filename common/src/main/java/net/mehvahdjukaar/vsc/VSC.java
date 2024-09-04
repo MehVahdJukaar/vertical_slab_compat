@@ -5,6 +5,8 @@ import net.mehvahdjukaar.moonlight.api.item.WoodBasedBlockItem;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.moonlight.api.platform.RegHelper;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
+import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.dynamicpack.ClientDynamicResourcesHandler;
@@ -24,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -46,7 +49,15 @@ public class VSC {
     public static final Map<CutBlockType, Block> VERTICAL_SLABS = new Object2ObjectOpenHashMap<>();
     public static final Map<CutBlockType, Item> VERTICAL_SLABS_ITEMS = new Object2ObjectOpenHashMap<>();
 
+    public static Supplier<List<String>> BLACKLIST;
+
     public static void commonInit() {
+        ConfigBuilder c = ConfigBuilder.create("v_slab_compat", ConfigType.COMMON);
+        BLACKLIST = c.comment("mod ids blacklist")
+                .define("blacklist", List.of("securitycraft"), o -> o instanceof String);
+
+        c.buildAndRegister().loadFromFile();
+
         if (PlatHelper.getPhysicalSide().isClient()) {
             VSCClient.init();
         }
@@ -100,6 +111,8 @@ public class VSC {
 
     private static void addItemsToTabs(RegHelper.ItemToTabEvent event) {
         for (var v : VERTICAL_SLABS_ITEMS.entrySet()) {
+            String namespace = v.getKey().getNamespace();
+            if (BLACKLIST.get().contains(namespace)) continue;
             event.addAfter(CreativeModeTabs.BUILDING_BLOCKS, i -> i.is(v.getKey().slab.asItem()), v.getValue());
         }
     }
