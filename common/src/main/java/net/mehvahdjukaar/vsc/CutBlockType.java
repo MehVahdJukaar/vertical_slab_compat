@@ -61,10 +61,7 @@ public class CutBlockType extends BlockType {
             }
             first = false;
         }
-        this.woodType = getEarlyWoodType();
-        if (woodType != null) {
-            woodType.addChild("quark:vertical_slab", this.getChild("vertical_slab"));
-        }
+
     }
 
     @Nullable
@@ -74,7 +71,10 @@ public class CutBlockType extends BlockType {
 
     @Override
     public void initializeChildrenItems() {
-
+        this.woodType = getEarlyWoodType();
+        if (woodType != null) {
+            woodType.addChild("quark:vertical_slab", this.getChild("vertical_slab"));
+        }
     }
 
 }
