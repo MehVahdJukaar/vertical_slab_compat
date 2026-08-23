@@ -150,7 +150,7 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
     }
 
     private void addBlocksLootTable(ResourceManager manager, ResourceSink sink) {
-        var template = StaticResource.getOrFail(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
+        var template = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
 
         VSC.VERTICAL_SLABS.forEach((w, block) -> {
             String fullText = template.asString().replace("$v_slab", Utils.getID(block).toString());
@@ -159,7 +159,7 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
     }
 
     private void addBlocksRecipes(ResourceManager manager, ResourceSink sink, String templateName) {
-        var template = StaticResource.getOrFail(manager, ResType.GENERIC.getPath(VSC.res("template/" + templateName + ".json")));
+        var template = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/" + templateName + ".json")));
         String recipeSuffix = templateName.substring("recipe".length());
         boolean isStonecutting = templateName.contains("stone");
 

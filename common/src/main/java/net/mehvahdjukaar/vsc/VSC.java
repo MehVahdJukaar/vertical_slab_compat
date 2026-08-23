@@ -79,6 +79,7 @@ public class VSC {
             var prop = new Item.Properties();
             if (type.getWoodType() != null) {
                 i = new WoodBasedBlockItem(block, prop, type.getWoodType());
+                //only does anything on fabric. neoforge reads the furnace fuel data map the server pack writes
                 RegHelper.registerItemBurnTime(i, WOOD_BURN_TIME);
             } else {
                 i = new BlockItem(block, prop);

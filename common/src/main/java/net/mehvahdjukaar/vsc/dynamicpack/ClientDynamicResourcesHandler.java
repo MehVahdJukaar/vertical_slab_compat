@@ -31,15 +31,16 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
 
     @Override
     protected Collection<String> gatherSupportedNamespaces() {
-        return List.of("minecraft");
+        //everything we generate lands under our own namespace, which is added for us
+        return List.of();
     }
 
     @Override
     protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
         executor.accept((manager, sink) -> {
-            var blockState = StaticResource.getOrFail(manager, ResType.BLOCKSTATES.getPath(VSC.res("vertical_slab_template")));
-            var blockModel = StaticResource.getOrFail(manager, ResType.BLOCK_MODELS.getPath(VSC.res("vertical_slab_template")));
-            var itemModel = StaticResource.getOrFail(manager, ResType.ITEM_MODELS.getPath(VSC.res("vertical_slab_template")));
+            var blockState = StaticResource.getOrThrow(manager, ResType.BLOCKSTATES.getPath(VSC.res("vertical_slab_template")));
+            var blockModel = StaticResource.getOrThrow(manager, ResType.BLOCK_MODELS.getPath(VSC.res("vertical_slab_template")));
+            var itemModel = StaticResource.getOrThrow(manager, ResType.ITEM_MODELS.getPath(VSC.res("vertical_slab_template")));
             for (var e : VSC.VERTICAL_SLABS.entrySet()) {
                 try {
                     var type = e.getKey();
