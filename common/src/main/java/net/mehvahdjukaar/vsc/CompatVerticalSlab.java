@@ -13,7 +13,7 @@ import org.violetmoon.quark.content.building.block.VerticalSlabBlock;
 
 import java.util.List;
 
-public class CompatVerticalSlab extends VerticalSlabBlock   {
+public class CompatVerticalSlab extends VerticalSlabBlock {
     private final CutBlockType blockType;
     private final BlockState mimic;
 
@@ -36,8 +36,6 @@ public class CompatVerticalSlab extends VerticalSlabBlock   {
         }
         return List.of();
     }
-
-
 
     @Override
     public float getDestroyProgress(BlockState state, Player player, BlockGetter worldIn, BlockPos pos) {

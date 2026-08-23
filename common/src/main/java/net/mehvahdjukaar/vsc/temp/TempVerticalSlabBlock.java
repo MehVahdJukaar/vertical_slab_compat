@@ -45,7 +45,7 @@ public class TempVerticalSlabBlock extends Block implements SimpleWaterloggedBlo
 
     public final Supplier<Block> parent;
 
-    public TempVerticalSlabBlock( Properties properties, CutBlockType type) {
+    public TempVerticalSlabBlock(Properties properties, CutBlockType type) {
         super(properties);
         this.parent = () -> type.base;
         registerDefaultState(defaultBlockState().setValue(TYPE, VerticalSlabType.NORTH).setValue(WATERLOGGED, false));
