@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.vsc.fabric;
+package net.mehvahdjukaar.vsc.platform;
 
 import net.minecraft.world.level.block.Block;
 

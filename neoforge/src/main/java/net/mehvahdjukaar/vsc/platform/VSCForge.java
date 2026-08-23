@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.vsc.forge;
+package net.mehvahdjukaar.vsc.platform;
 
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.vsc.VSC;

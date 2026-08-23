@@ -1,4 +1,4 @@
-package net.mehvahdjukaar.vsc.forge;
+package net.mehvahdjukaar.vsc.platform;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
