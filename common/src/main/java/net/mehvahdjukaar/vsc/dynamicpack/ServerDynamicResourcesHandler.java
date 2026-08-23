@@ -1,15 +1,16 @@
 package net.mehvahdjukaar.vsc.dynamicpack;
 
 import com.google.gson.JsonElement;
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
+import com.google.gson.JsonObject;
 import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.SimpleTagBuilder;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynServerResourcesGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicDataPack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicServerResourceProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.PackGenerationStrategy;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceSink;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.vsc.CutBlockType;
 import net.mehvahdjukaar.vsc.VSC;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,105 +22,95 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
-public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
+public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider {
 
     public static final ServerDynamicResourcesHandler INSTANCE = new ServerDynamicResourcesHandler();
 
-    private final Set<String> recipeLocations;
+    private static final List<String> RECIPE_TEMPLATES = List.of("recipe", "recipe_2", "recipe_stonecutter");
 
     public ServerDynamicResourcesHandler() {
-        super(new DynamicDataPack(VSC.res("generated_pack")));
-        //needed for tags
-        getPack().addNamespaces("minecraft");
-        getPack().addNamespaces("forge");
-        getPack().addNamespaces("quark");
-        this.dynamicPack.setGenerateDebugResources(PlatHelper.isDev());
-
-        this.recipeLocations = Set.of("recipe", "recipe_2", "recipe_stonecutter");
+        super(VSC.res("generated_pack"), PackGenerationStrategy.REGEN_ON_EVERY_RELOAD);
     }
 
     @Override
-    public Logger getLogger() {
-        return VSC.LOGGER;
+    protected Collection<String> gatherSupportedNamespaces() {
+        //minecraft and quark for the tags we copy into, neoforge for the furnace fuel data map
+        return List.of("minecraft", "quark", "neoforge");
     }
 
     @Override
-    public boolean dependsOnLoadedPacks() {
-        return true;
-    }
-
-    @Override
-    public void regenerateDynamicAssets(ResourceManager manager) {
-        this.recipeLocations.forEach(res -> {
-            try {
-                addBlocksRecipes(manager, ResType.GENERIC.getPath(VSC.res("template/" + res + ".json")));
-            } catch (Exception e) {
-                VSC.LOGGER.error("Failed to generate recipes for template at location {} ", res);
+    protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
+        executor.accept((manager, sink) -> {
+            for (var res : RECIPE_TEMPLATES) {
+                try {
+                    addBlocksRecipes(manager, sink, res);
+                } catch (Exception e) {
+                    VSC.LOGGER.error("Failed to generate recipes for template at location {} ", res);
+                }
             }
         });
 
-        addBlocksLootTable(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
-
-        addTags(manager);
-
+        executor.accept(this::addBlocksLootTable);
+        executor.accept(this::addTags);
+        executor.accept((manager, sink) -> addFurnaceFuels(sink));
     }
 
-    private void addTags(ResourceManager manager) {
+    private void addTags(ResourceManager manager, ResourceSink sink) {
         SimpleTagBuilder tag = SimpleTagBuilder.of(VSC.res("vertical_slabs"));
         tag.addEntries(VSC.VERTICAL_SLABS_ITEMS.values());
-        dynamicPack.addTag(tag, Registries.BLOCK);
-        dynamicPack.addTag(tag, Registries.ITEM);
-        SimpleTagBuilder quarkTag = SimpleTagBuilder.of(new ResourceLocation("quark:vertical_slabs"));
-        SimpleTagBuilder quarkWoodenTag = SimpleTagBuilder.of(new ResourceLocation("quark:wooden_vertical_slabs"));
+        sink.addTag(tag, Registries.BLOCK);
+        sink.addTag(tag, Registries.ITEM);
+        SimpleTagBuilder quarkTag = SimpleTagBuilder.of(ResourceLocation.parse("quark:vertical_slabs"));
+        SimpleTagBuilder quarkWoodenTag = SimpleTagBuilder.of(ResourceLocation.parse("quark:wooden_vertical_slabs"));
         quarkTag.addTag(tag);
-        quarkWoodenTag.addEntries(VSC.VERTICAL_SLABS_ITEMS.entrySet().stream()
-                .filter(t -> t.getKey().getWoodType() != null).map(Map.Entry::getValue).toList());
-        dynamicPack.addTag(quarkTag, Registries.BLOCK);
-        dynamicPack.addTag(quarkTag, Registries.ITEM);
-        dynamicPack.addTag(quarkWoodenTag, Registries.BLOCK);
-        dynamicPack.addTag(quarkWoodenTag, Registries.ITEM);
+        quarkWoodenTag.addEntries(woodenSlabItems());
+        sink.addTag(quarkTag, Registries.BLOCK);
+        sink.addTag(quarkTag, Registries.ITEM);
+        sink.addTag(quarkWoodenTag, Registries.BLOCK);
+        sink.addTag(quarkWoodenTag, Registries.ITEM);
 
-        copyTags(manager, BlockTags.NEEDS_STONE_TOOL, Registries.BLOCK);
-        copyTags(manager, BlockTags.NEEDS_IRON_TOOL, Registries.BLOCK);
-        copyTags(manager, BlockTags.NEEDS_DIAMOND_TOOL, Registries.BLOCK);
-        copyTags(manager, BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK);
-        copyTags(manager, BlockTags.MINEABLE_WITH_HOE, Registries.BLOCK);
-        copyTags(manager, BlockTags.MINEABLE_WITH_PICKAXE, Registries.BLOCK);
-        copyTags(manager, BlockTags.MINEABLE_WITH_SHOVEL, Registries.BLOCK);
-        copyTags(manager, BlockTags.DRAGON_IMMUNE, Registries.BLOCK);
-        copyTags(manager, BlockTags.DAMPENS_VIBRATIONS, Registries.BLOCK);
-        copyTags(manager, BlockTags.GUARDED_BY_PIGLINS, Registries.BLOCK);
-        copyTags(manager, ItemTags.PIGLIN_LOVED, Registries.ITEM);
+        copyTags(manager, sink, BlockTags.NEEDS_STONE_TOOL, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.NEEDS_IRON_TOOL, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.NEEDS_DIAMOND_TOOL, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.MINEABLE_WITH_AXE, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.MINEABLE_WITH_HOE, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.MINEABLE_WITH_PICKAXE, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.MINEABLE_WITH_SHOVEL, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.DRAGON_IMMUNE, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.DAMPENS_VIBRATIONS, Registries.BLOCK);
+        copyTags(manager, sink, BlockTags.GUARDED_BY_PIGLINS, Registries.BLOCK);
+        copyTags(manager, sink, ItemTags.PIGLIN_LOVED, Registries.ITEM);
     }
 
-    private <T> void copyTags(ResourceManager manager, TagKey<T> tagKey, ResourceKey<Registry<T>> registry) {
+    private <T> void copyTags(ResourceManager manager, ResourceSink sink, TagKey<T> tagKey, ResourceKey<Registry<T>> registry) {
         Set<String> tagValues = getTags(manager, tagKey);
 
-        SimpleTagBuilder builer = SimpleTagBuilder.of(tagKey);
+        SimpleTagBuilder builder = SimpleTagBuilder.of(tagKey);
         for (var e : VSC.VERTICAL_SLABS_ITEMS.entrySet()) {
             ResourceLocation id = BuiltInRegistries.BLOCK.getKey(e.getKey().slab);
             if (tagValues.contains(id.toString())) {
-                builer.addEntry(e.getValue());
+                builder.addEntry(e.getValue());
             }
         }
-        var b = builer.build();
-        if (!b.isEmpty()) {
-            dynamicPack.addTag(builer, registry);
+        if (!builder.build().isEmpty()) {
+            sink.addTag(builder, registry);
         }
     }
 
     @NotNull
     private static <T> Set<String> getTags(ResourceManager manager, TagKey<T> tagKey) {
-        var resources = manager.getResourceStack(ResType.TAGS.getPath(tagKey.location().withPrefix(tagKey.registry().location().getPath() + "s/")));
+        var resources = manager.getResourceStack(ResType.getTagPath(tagKey));
         Set<String> tagValues = new HashSet<>();
         Set<String> actualTags = new HashSet<>();
         for (var r : resources) {
@@ -133,53 +124,63 @@ public class ServerDynamicResourcesHandler extends DynServerResourcesGenerator {
         }
         for (var s : tagValues) {
             if (s.startsWith("#")) {
-                var res = new ResourceLocation(s.substring(1));
+                var res = ResourceLocation.parse(s.substring(1));
                 if (res.getPath().contains("slab")) {
                     TagKey<T> newKey = TagKey.create(tagKey.registry(), res);
                     actualTags.addAll(getTags(manager, newKey));
                 }
-            }else actualTags.add(s);
+            } else actualTags.add(s);
         }
         return actualTags;
     }
 
-    private void addBlocksLootTable(ResourceManager manager, ResourceLocation templateLootTable) {
-        var template = StaticResource.getOrFail(manager, templateLootTable);
+    //neoforge only. on fabric burn times are registered in code instead
+    private void addFurnaceFuels(ResourceSink sink) {
+        JsonObject values = new JsonObject();
+        for (var i : woodenSlabItems()) {
+            JsonObject entry = new JsonObject();
+            entry.addProperty("burn_time", VSC.WOOD_BURN_TIME);
+            values.add(Utils.getID(i).toString(), entry);
+        }
+        if (values.size() == 0) return;
+        JsonObject json = new JsonObject();
+        json.add("values", values);
+        sink.addJson(ResourceLocation.fromNamespaceAndPath("neoforge", "data_maps/item/furnace_fuels"),
+                json, ResType.JSON);
+    }
 
-        VSC.VERTICAL_SLABS.forEach((w, i) -> {
-            String fullText = new String(template.data, StandardCharsets.UTF_8);
+    private void addBlocksLootTable(ResourceManager manager, ResourceSink sink) {
+        var template = StaticResource.getOrFail(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
 
-            fullText = fullText.replace("$v_slab", Utils.getID(i).toString());
-
-            String id = template.location.toString();
-            id = id.replace("template/loot_table", "loot_tables/" + i.getLootTable().getPath());
-            this.dynamicPack.addResource(StaticResource.create(fullText.getBytes(), new ResourceLocation(id)));
+        VSC.VERTICAL_SLABS.forEach((w, block) -> {
+            String fullText = template.asString().replace("$v_slab", Utils.getID(block).toString());
+            sink.addBytes(block.getLootTable().location(), fullText.getBytes(StandardCharsets.UTF_8), ResType.LOOT_TABLES);
         });
     }
 
-    private void addBlocksRecipes(ResourceManager manager, ResourceLocation templateRecipe) {
-        var template = StaticResource.getOrFail(manager, templateRecipe);
+    private void addBlocksRecipes(ResourceManager manager, ResourceSink sink, String templateName) {
+        var template = StaticResource.getOrFail(manager, ResType.GENERIC.getPath(VSC.res("template/" + templateName + ".json")));
+        String recipeSuffix = templateName.substring("recipe".length());
+        boolean isStonecutting = templateName.contains("stone");
 
         VSC.VERTICAL_SLABS_ITEMS.forEach((w, i) -> {
-            if (isSlabEnabled(w, i)) {
-                if (templateRecipe.getPath().contains("stone") && w.getWoodType() != null) return;
-                String fullText = new String(template.data, StandardCharsets.UTF_8);
+            if (VSC.BLACKLIST.get().contains(w.getNamespace())) return;
+            if (isStonecutting && w.getWoodType() != null) return;
 
-                fullText = fullText.replace("$slab", Utils.getID(w.slab).toString());
-                fullText = fullText.replace("$v_slab", Utils.getID(w.getChild("vertical_slab")).toString());
-                fullText = fullText.replace("$block", Utils.getID(w.base).toString());
+            String fullText = template.asString();
+            fullText = fullText.replace("$slab", Utils.getID(w.slab).toString());
+            fullText = fullText.replace("$v_slab", Utils.getID(w.getBlockOfThis("vertical_slab")).toString());
+            fullText = fullText.replace("$block", Utils.getID(w.base).toString());
 
-                String id = template.location.toString();
-                id = id.replace("template/recipe", "recipes/" + w.getAppendableId());
-                this.dynamicPack.addResource(StaticResource.create(fullText.getBytes(), new ResourceLocation(id)));
-            }
+            sink.addBytes(VSC.res(w.getAppendableId() + recipeSuffix),
+                    fullText.getBytes(StandardCharsets.UTF_8), ResType.RECIPES);
         });
     }
 
-    private boolean isSlabEnabled(CutBlockType w, Item i) {
-        String namespace = w.getNamespace();
-        return !VSC.BLACKLIST.get().contains(namespace);
+    private static Collection<Item> woodenSlabItems() {
+        return VSC.VERTICAL_SLABS_ITEMS.entrySet().stream()
+                .filter(t -> t.getKey().getWoodType() != null)
+                .map(Map.Entry::getValue).toList();
     }
-
 
 }

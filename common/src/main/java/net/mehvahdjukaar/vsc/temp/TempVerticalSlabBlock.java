@@ -1,19 +1,17 @@
 package net.mehvahdjukaar.vsc.temp;
 
 import net.mehvahdjukaar.vsc.CutBlockType;
-import net.minecraft.client.color.block.BlockColor;
-import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
@@ -135,8 +133,8 @@ public class TempVerticalSlabBlock extends Block implements SimpleWaterloggedBlo
     }
 
     @Override
-    public boolean canPlaceLiquid(@NotNull BlockGetter worldIn, @NotNull BlockPos pos, BlockState state, @NotNull Fluid fluidIn) {
-        return state.getValue(TYPE) != VerticalSlabType.DOUBLE && SimpleWaterloggedBlock.super.canPlaceLiquid(worldIn, pos, state, fluidIn);
+    public boolean canPlaceLiquid(@Nullable Player player, @NotNull BlockGetter worldIn, @NotNull BlockPos pos, BlockState state, @NotNull Fluid fluidIn) {
+        return state.getValue(TYPE) != VerticalSlabType.DOUBLE && SimpleWaterloggedBlock.super.canPlaceLiquid(player, worldIn, pos, state, fluidIn);
     }
 
     @NotNull
@@ -149,8 +147,8 @@ public class TempVerticalSlabBlock extends Block implements SimpleWaterloggedBlo
     }
 
     @Override
-    public boolean isPathfindable(@NotNull BlockState state, @NotNull BlockGetter worldIn, @NotNull BlockPos pos, @NotNull PathComputationType type) {
-        return type == PathComputationType.WATER && worldIn.getFluidState(pos).is(FluidTags.WATER);
+    protected boolean isPathfindable(@NotNull BlockState state, @NotNull PathComputationType type) {
+        return type == PathComputationType.WATER && state.getFluidState().is(FluidTags.WATER);
     }
 
     public enum VerticalSlabType implements StringRepresentable {

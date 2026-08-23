@@ -1,12 +1,8 @@
 package net.mehvahdjukaar.vsc.platform;
 
-import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
 import net.mehvahdjukaar.vsc.VSC;
-import net.mehvahdjukaar.vsc.VSCClient;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Author: MehVahdJukaar
@@ -14,13 +10,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod(VSC.MOD_ID)
 public class VSCForge {
 
-    public VSCForge() {
+    public VSCForge(IEventBus bus) {
         VSC.commonInit();
     }
 
-    public void onTagLoadEvent(TagsUpdatedEvent event){
-
-    }
-
 }
-

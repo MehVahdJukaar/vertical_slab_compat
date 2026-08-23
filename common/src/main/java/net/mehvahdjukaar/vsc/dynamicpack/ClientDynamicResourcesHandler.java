@@ -6,68 +6,67 @@ import net.mehvahdjukaar.moonlight.api.resources.RPUtils;
 import net.mehvahdjukaar.moonlight.api.resources.ResType;
 import net.mehvahdjukaar.moonlight.api.resources.StaticResource;
 import net.mehvahdjukaar.moonlight.api.resources.assets.LangBuilder;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynClientResourcesGenerator;
-import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicTexturePack;
+import net.mehvahdjukaar.moonlight.api.resources.pack.DynamicClientResourceProvider;
+import net.mehvahdjukaar.moonlight.api.resources.pack.PackGenerationStrategy;
+import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.VSC;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
-import org.apache.logging.log4j.Logger;
 
 import java.io.FileNotFoundException;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
 
 
-public class ClientDynamicResourcesHandler extends DynClientResourcesGenerator {
+public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider {
 
     public static final ClientDynamicResourcesHandler INSTANCE = new ClientDynamicResourcesHandler();
 
     public ClientDynamicResourcesHandler() {
-        super(new DynamicTexturePack(VSC.res("generated_pack")));
+        super(VSC.res("generated_pack"), PackGenerationStrategy.REGEN_ON_EVERY_RELOAD);
     }
 
     @Override
-    public Logger getLogger() {
-        return VSC.LOGGER;
+    protected Collection<String> gatherSupportedNamespaces() {
+        return List.of("minecraft");
     }
 
     @Override
-    public boolean dependsOnLoadedPacks() {
-        return true;
-    }
+    protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
+        executor.accept((manager, sink) -> {
+            var blockState = StaticResource.getOrFail(manager, ResType.BLOCKSTATES.getPath(VSC.res("vertical_slab_template")));
+            var blockModel = StaticResource.getOrFail(manager, ResType.BLOCK_MODELS.getPath(VSC.res("vertical_slab_template")));
+            var itemModel = StaticResource.getOrFail(manager, ResType.ITEM_MODELS.getPath(VSC.res("vertical_slab_template")));
+            for (var e : VSC.VERTICAL_SLABS.entrySet()) {
+                try {
+                    var type = e.getKey();
+                    var texture = RPUtils.findFirstBlockTextureLocation(manager, type.slab);
+                    var blockModelLocation = findFirstBlockModel(manager, type.base);
+                    ResourceLocation id = Utils.getID(e.getValue());
+                    String modelId = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "block/" + id.getPath()).toString();
 
-    @Override
-    public void regenerateDynamicAssets(ResourceManager manager) {
-        var blockState = StaticResource.getOrFail(manager, ResType.BLOCKSTATES.getPath(VSC.res("vertical_slab_template")));
-        var blockModel = StaticResource.getOrFail(manager, ResType.BLOCK_MODELS.getPath(VSC.res("vertical_slab_template")));
-        var itemModel = StaticResource.getOrFail(manager, ResType.ITEM_MODELS.getPath(VSC.res("vertical_slab_template")));
-        for (var e : VSC.VERTICAL_SLABS.entrySet()) {
-            try {
-                var type = e.getKey();
-                var texture = RPUtils.findFirstBlockTextureLocation(manager, type.slab);
-                var blockModelLocation = findFirstBlockModel(manager, type.base);
-                ResourceLocation id = Utils.getID(e.getValue());
-                String modelId = new ResourceLocation(id.getNamespace(), "block/" + id.getPath()).toString();
+                    sink.addSimilarJsonResource(manager, blockModel,
+                            text -> text.replace("$texture", texture.toString()),
+                            name -> name.replace("vertical_slab_template", id.getPath()));
+                    sink.addSimilarJsonResource(manager, blockState,
+                            text -> {
+                                text = text.replace("$v_slab", modelId);
+                                text = text.replace("$block", blockModelLocation.toString());
+                                return text;
+                            },
+                            name -> name.replace("vertical_slab_template", id.getPath()));
+                    sink.addSimilarJsonResource(manager, itemModel,
+                            text -> text.replace("$v_slab", modelId),
+                            name -> name.replace("vertical_slab_template", id.getPath()));
 
-                this.addSimilarJsonResource(manager, blockModel,
-                        text -> text.replace("$texture", texture.toString()),
-                        name -> name.replace("vertical_slab_template", id.getPath()));
-                this.addSimilarJsonResource(manager, blockState,
-                        text -> {
-                            text = text.replace("$v_slab", modelId);
-                            text = text.replace("$block", blockModelLocation.toString());
-                            return text;
-                        },
-                        name -> name.replace("vertical_slab_template", id.getPath()));
-                this.addSimilarJsonResource(manager, itemModel,
-                        text -> text.replace("$v_slab", modelId),
-                        name -> name.replace("vertical_slab_template", id.getPath()));
-
-            } catch (Exception ex) {
-                VSC.LOGGER.error("Failed to generate assets for {}", e.getValue());
+                } catch (Exception ex) {
+                    VSC.LOGGER.error("Failed to generate assets for {}", e.getValue());
+                }
             }
-        }
-
+        });
     }
 
 
@@ -79,7 +78,7 @@ public class ClientDynamicResourcesHandler extends DynClientResourcesGenerator {
             JsonElement bsElement = RPUtils.deserializeJson(bsStream);
 
             //grabs the first resource location of a model
-            return new ResourceLocation(RPUtils.findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
+            return ResourceLocation.parse(RPUtils.findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
                     .stream().findAny().get());
 
         } catch (Exception ignored) {
@@ -88,11 +87,9 @@ public class ClientDynamicResourcesHandler extends DynClientResourcesGenerator {
     }
 
     @Override
-    public void addDynamicTranslations(AfterLanguageLoadEvent lang) {
-        VSC.VERTICAL_SLABS.forEach((w, b) -> {
-            LangBuilder.addDynamicEntry(lang, "block_type.v_slab_compat.vertical_slab", w, b);
-
-        });
+    protected void addDynamicTranslations(AfterLanguageLoadEvent lang) {
+        VSC.VERTICAL_SLABS.forEach((w, b) ->
+                LangBuilder.addDynamicEntry(lang, "block_type.v_slab_compat.vertical_slab", w, b));
     }
 
 }

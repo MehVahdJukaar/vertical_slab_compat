@@ -9,7 +9,6 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigBuilder;
 import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
-import net.mehvahdjukaar.vsc.dynamicpack.ClientDynamicResourcesHandler;
 import net.mehvahdjukaar.vsc.dynamicpack.ServerDynamicResourcesHandler;
 import net.mehvahdjukaar.vsc.temp.QuarkCompat;
 import net.mehvahdjukaar.vsc.temp.TempVerticalSlabBlock;
@@ -23,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -38,8 +36,11 @@ public class VSC {
     public static final Logger LOGGER = LogManager.getLogger();
     public static final boolean QUARK = PlatHelper.isModLoaded("quark");
 
+    //same value quark uses for its own wooden vertical slabs
+    public static final int WOOD_BURN_TIME = 150;
+
     public static ResourceLocation res(String name) {
-        return new ResourceLocation(MOD_ID, name);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
     }
 
     public static final List<String> VERTICAL_SLABS_MODS = Stream.of("quark", "buildersaddition", "compatoplenty", "everycomp")
@@ -52,47 +53,43 @@ public class VSC {
     public static Supplier<List<String>> BLACKLIST;
 
     public static void commonInit() {
-        ConfigBuilder c = ConfigBuilder.create("v_slab_compat", ConfigType.COMMON);
+        ConfigBuilder c = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
         BLACKLIST = c.comment("mod ids blacklist")
                 .define("blacklist", List.of("securitycraft"), o -> o instanceof String);
-
-        c.buildAndRegister().loadFromFile();
+        c.build();
 
         if (PlatHelper.getPhysicalSide().isClient()) {
             VSCClient.init();
         }
         BlockSetAPI.registerBlockSetDefinition(new CutBlockTypeRegistry("cut_block_type"));
 
-        BlockSetAPI.addDynamicBlockRegistration(VSC::registerVerticalSlab, CutBlockType.class);
-        BlockSetAPI.addDynamicRegistration(VSC::registerItems, CutBlockType.class, BuiltInRegistries.ITEM);
+        BlockSetAPI.addDynamicRegistration(MOD_ID, VSC::registerVerticalSlabs, BuiltInRegistries.BLOCK);
+        BlockSetAPI.addDynamicRegistration(MOD_ID, VSC::registerItems, BuiltInRegistries.ITEM);
 
-        ServerDynamicResourcesHandler.INSTANCE.register();
-
-        if (PlatHelper.getPhysicalSide().isClient()) {
-            ClientDynamicResourcesHandler.INSTANCE.register();
-        }
+        RegHelper.registerDynamicResourceProvider(ServerDynamicResourcesHandler.INSTANCE);
 
         RegHelper.addItemsToTabsRegistration(VSC::addItemsToTabs);
     }
 
-    private static void registerItems(Registrator<Item> itemRegistrator, Collection<CutBlockType> types) {
+    private static void registerItems(Registrator<Item> itemRegistrator) {
         for (var v : VERTICAL_SLABS.entrySet()) {
             var type = v.getKey();
             var block = v.getValue();
             Item i;
             var prop = new Item.Properties();
             if (type.getWoodType() != null) {
-                i = new WoodBasedBlockItem(block, prop, type.getWoodType(), 150);
+                i = new WoodBasedBlockItem(block, prop, type.getWoodType());
+                RegHelper.registerItemBurnTime(i, WOOD_BURN_TIME);
             } else {
                 i = new BlockItem(block, prop);
             }
-            itemRegistrator.register(Utils.getID(v.getValue()), i);
+            itemRegistrator.register(Utils.getID(block), i);
             VERTICAL_SLABS_ITEMS.put(type, i);
         }
     }
 
-    private static void registerVerticalSlab(Registrator<Block> blockRegistrator, Collection<CutBlockType> types) {
-        for (var type : types) {
+    private static void registerVerticalSlabs(Registrator<Block> blockRegistrator) {
+        for (var type : BlockSetAPI.getBlockSet(CutBlockType.class).getValues()) {
             if (type.getChild("vertical_slab") != null) continue;
             String name = type.getTypeName() + "_vertical_slab";
             ResourceLocation newId = res(type.getNamespace().equals("minecraft") ? name : type.getNamespace() + "/" + name);

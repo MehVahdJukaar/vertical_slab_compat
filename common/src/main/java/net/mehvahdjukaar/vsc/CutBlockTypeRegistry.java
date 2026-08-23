@@ -1,22 +1,21 @@
 package net.mehvahdjukaar.vsc;
 
 import com.google.common.base.Stopwatch;
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SlabBlock;
-import org.jetbrains.annotations.Contract;
 
 import java.util.*;
 
 public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
-    public static final CutBlockType STONE_TYPE = new CutBlockType(new ResourceLocation("stone"), Blocks.STONE, Blocks.STONE_SLAB);
+    public static final CutBlockType STONE_TYPE = new CutBlockType(
+            ResourceLocation.withDefaultNamespace("stone"), Blocks.STONE, Blocks.STONE_SLAB);
 
     protected CutBlockTypeRegistry(String name) {
         super(CutBlockType.class, name);
@@ -33,7 +32,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
     private final Set<String> blacklist = Set.of("securitycraft", "betterend", "betternether");
 
     @Override
-    public Optional<CutBlockType> detectTypeFromBlock(Block block, ResourceLocation baseRes) {
+    protected Optional<CutBlockType> detectTypeFromBlock(Block block, ResourceLocation baseRes) {
         String name = null;
         String path = baseRes.getPath();
         if (path.endsWith("_slab") && !path.endsWith("_vertical_slab")) {
@@ -43,7 +42,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
         }
         String namespace = baseRes.getNamespace();
         if (name != null && block instanceof SlabBlock && !blacklist.contains(namespace)) {
-            ResourceLocation id = new ResourceLocation(namespace, name);
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace, name);
             var parent = BuiltInRegistries.BLOCK.getOptional(id);
 
             if (parent.isEmpty() && namespace.equals("absentbydesign")) {
@@ -51,8 +50,8 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
                 for (var d : dyes) {
                     if (finalName.contains(d)) {
                         var n = d + "_" + finalName.replace("_" + d, "");
-                        parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(n));
-                        if (parent.isPresent()) id = new ResourceLocation("absentbydesign", n);
+                        parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(n));
+                        if (parent.isPresent()) id = ResourceLocation.fromNamespaceAndPath("absentbydesign", n);
                         break;
                     }
                 }
@@ -60,10 +59,11 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
 
             }
             if (parent.isEmpty())
-                parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(namespace, name + "s"));
+                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, name + "s"));
             if (parent.isEmpty())
-                parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(namespace, name + "_planks"));
-            if (parent.isEmpty()) parent = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(name));
+                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, name + "_planks"));
+            if (parent.isEmpty())
+                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(name));
             if (parent.isPresent() && hasRightShapeHack(block)) {
                 return Optional.of(new CutBlockType(id, parent.get(), block));
             }
@@ -78,8 +78,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
         VSC.LOGGER.info("Initialized slab sets in: {} ms", watch.elapsed().toMillis());
     }
 
-    @Contract
-    @ExpectPlatform
+    @PlatformImpl
     public static boolean hasRightShapeHack(Block block) {
         throw new AssertionError();
     }

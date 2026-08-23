@@ -39,7 +39,7 @@ public class CutBlockType extends BlockType {
     }
 
     @Override
-    public void initializeChildrenBlocks() {
+    protected void initializeChildrenBlocks() {
         this.addChild("base", base);
         this.addChild("slab", slab);
         List<String> list = new ArrayList<>();
@@ -47,13 +47,13 @@ public class CutBlockType extends BlockType {
         list.addAll(VSC.VERTICAL_SLABS_MODS);
         boolean first = true;
         for (var s : list) {
-            var o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_vertical_slab"));
+            var o = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(s, this.getTypeName() + "_vertical_slab"));
             if (o.isPresent()) {
                 this.addChild("vertical_slab", o.get());
                 break;
             }
             if (first) {
-                o = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(s, this.getTypeName() + "_slab_vert"));
+                o = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(s, this.getTypeName() + "_slab_vert"));
                 if (o.isPresent()) {
                     this.addChild("vertical_slab", o.get());
                     break;
@@ -70,7 +70,7 @@ public class CutBlockType extends BlockType {
     }
 
     @Override
-    public void initializeChildrenItems() {
+    protected void initializeChildrenItems() {
         this.woodType = getEarlyWoodType();
         if (woodType != null) {
             woodType.addChild("quark:vertical_slab", this.getChild("vertical_slab"));
