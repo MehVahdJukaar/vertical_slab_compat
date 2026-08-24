@@ -3,14 +3,10 @@ plugins {
 }
 
 val moonlight_version: String by extra
-val quark_file_id: String by extra
-val zeta_version: String by extra
 
 dependencies {
-    modCompileOnly("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+    //@jar skips moonlight's module metadata: its jar variants are tagged neoforge-only, so in this module gradle
+    //would otherwise fall back to the access transformer variant and the whole api would be missing from the classpath
+    modCompileOnly("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}@jar")
     accessTransformers("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
-
-    modCompileOnly("curse.maven:quark-243121:${quark_file_id}")
-    // quark ships without zeta, but VerticalSlabBlock implements its interfaces
-    modCompileOnly("org.violetmoon.zeta:Zeta:${zeta_version}")
 }

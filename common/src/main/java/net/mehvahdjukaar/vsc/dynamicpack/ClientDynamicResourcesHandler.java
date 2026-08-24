@@ -16,6 +16,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
 
 import java.io.FileNotFoundException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
@@ -38,9 +39,9 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
     @Override
     protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
         executor.accept((manager, sink) -> {
-            var blockState = StaticResource.getOrThrow(manager, ResType.BLOCKSTATES.getPath(VSC.res("vertical_slab_template")));
-            var blockModel = StaticResource.getOrThrow(manager, ResType.BLOCK_MODELS.getPath(VSC.res("vertical_slab_template")));
-            var itemModel = StaticResource.getOrThrow(manager, ResType.ITEM_MODELS.getPath(VSC.res("vertical_slab_template")));
+            var blockState = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/blockstate.json")));
+            var blockModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/block_model.json")));
+            var itemModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/item_model.json")));
             for (var e : VSC.VERTICAL_SLABS.entrySet()) {
                 try {
                     var type = e.getKey();
@@ -49,22 +50,21 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
                     ResourceLocation id = Utils.getID(e.getValue());
                     String modelId = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "block/" + id.getPath()).toString();
 
-                    sink.addSimilarJsonResource(manager, blockModel,
-                            text -> text.replace("$texture", texture.toString()),
-                            name -> name.replace("vertical_slab_template", id.getPath()));
-                    sink.addSimilarJsonResource(manager, blockState,
-                            text -> {
-                                text = text.replace("$v_slab", modelId);
-                                text = text.replace("$block", blockModelLocation.toString());
-                                return text;
-                            },
-                            name -> name.replace("vertical_slab_template", id.getPath()));
-                    sink.addSimilarJsonResource(manager, itemModel,
-                            text -> text.replace("$v_slab", modelId),
-                            name -> name.replace("vertical_slab_template", id.getPath()));
+                    sink.addBytes(id, blockModel.asString()
+                            .replace("$texture", texture.toString())
+                            .getBytes(StandardCharsets.UTF_8), ResType.BLOCK_MODELS);
+
+                    sink.addBytes(id, blockState.asString()
+                            .replace("$v_slab", modelId)
+                            .replace("$block", blockModelLocation.toString())
+                            .getBytes(StandardCharsets.UTF_8), ResType.BLOCKSTATES);
+
+                    sink.addBytes(id, itemModel.asString()
+                            .replace("$v_slab", modelId)
+                            .getBytes(StandardCharsets.UTF_8), ResType.ITEM_MODELS);
 
                 } catch (Exception ex) {
-                    VSC.LOGGER.error("Failed to generate assets for {}", e.getValue());
+                    VSC.LOGGER.error("Failed to generate assets for {}", e.getValue(), ex);
                 }
             }
         });

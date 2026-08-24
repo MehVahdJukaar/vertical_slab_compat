@@ -1,6 +1,7 @@
 package net.mehvahdjukaar.vsc;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.item.WoodBasedBlockItem;
 import net.mehvahdjukaar.moonlight.api.misc.Registrator;
 import net.mehvahdjukaar.moonlight.api.platform.PlatHelper;
@@ -10,8 +11,6 @@ import net.mehvahdjukaar.moonlight.api.platform.configs.ConfigType;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.dynamicpack.ServerDynamicResourcesHandler;
-import net.mehvahdjukaar.vsc.temp.QuarkCompat;
-import net.mehvahdjukaar.vsc.temp.TempVerticalSlabBlock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -20,7 +19,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -54,8 +52,10 @@ public class VSC {
 
     public static void commonInit() {
         ConfigBuilder c = ConfigBuilder.create(MOD_ID, ConfigType.COMMON);
+        c.push("general");
         BLACKLIST = c.comment("mod ids blacklist")
                 .define("blacklist", List.of("securitycraft"), o -> o instanceof String);
+        c.pop();
         c.build();
 
         if (PlatHelper.getPhysicalSide().isClient()) {
@@ -102,9 +102,9 @@ public class VSC {
         }
     }
 
-    @NotNull
-    private static Block createVSlab(CutBlockType type) {
-        return QUARK ? QuarkCompat.createVSlab(type) : new TempVerticalSlabBlock(Utils.copyPropertySafe(type.base), type);
+    @PlatformImpl
+    public static Block createVSlab(CutBlockType type) {
+        throw new AssertionError();
     }
 
     private static void addItemsToTabs(RegHelper.ItemToTabEvent event) {
