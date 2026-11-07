@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "shape=north": { "model": "$v_slab", "y": 0, "uvlock": true },
+    "shape=east": { "model": "$v_slab", "y": 90, "uvlock": true },
+    "shape=south": { "model": "$v_slab", "y": 180, "uvlock": true },
+    "shape=west": { "model": "$v_slab", "y": 270, "uvlock": true },
+    "shape=double_x": { "model": "$block" },
+    "shape=double_z": { "model": "$block" }
+  }
+}

@@ -1,0 +1,7 @@
+{
+    "parent": "buildersaddition2:block/base_panel",
+    "textures": {
+        "texture": "$texture",
+        "particle": "$texture"
+    }
+}

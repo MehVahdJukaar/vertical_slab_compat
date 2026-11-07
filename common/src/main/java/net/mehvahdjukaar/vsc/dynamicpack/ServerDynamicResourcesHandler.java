@@ -24,7 +24,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashSet;
@@ -115,28 +114,30 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
 
     @NotNull
     private static <T> Set<String> getTags(ResourceManager manager, TagKey<T> tagKey) {
-        var resources = manager.getResourceStack(ResType.getTagPath(tagKey));
-        Set<String> tagValues = new HashSet<>();
         Set<String> actualTags = new HashSet<>();
-        for (var r : resources) {
+        collectTagEntries(manager, tagKey, actualTags, new HashSet<>());
+        return actualTags;
+    }
+
+    private static <T> void collectTagEntries(ResourceManager manager, TagKey<T> tagKey, Set<String> entries, Set<ResourceLocation> visitedTags) {
+        if (!visitedTags.add(tagKey.location())) return;
+        Set<String> tagValues = new HashSet<>();
+        for (var r : manager.getResourceStack(ResType.getTagPath(tagKey))) {
             try (var res = r.open()) {
-                RPUtils.deserializeJson(res).getAsJsonArray("values")
-                        .asList().stream()
-                        .filter(JsonElement::isJsonPrimitive).forEach(v -> tagValues.add(v.getAsString()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                for (JsonElement v : RPUtils.deserializeJson(res).getAsJsonArray("values")) {
+                    //optional entries are {"id": ..., "required": false}
+                    if (v.isJsonObject()) tagValues.add(v.getAsJsonObject().get("id").getAsString());
+                    else tagValues.add(v.getAsString());
+                }
+            } catch (Exception e) {
+                VSC.LOGGER.error("Failed to read tag {}", tagKey.location(), e);
             }
         }
         for (var s : tagValues) {
             if (s.startsWith("#")) {
-                var res = ResourceLocation.parse(s.substring(1));
-                if (res.getPath().contains("slab")) {
-                    TagKey<T> newKey = TagKey.create(tagKey.registry(), res);
-                    actualTags.addAll(getTags(manager, newKey));
-                }
-            } else actualTags.add(s);
+                collectTagEntries(manager, TagKey.create(tagKey.registry(), ResourceLocation.parse(s.substring(1))), entries, visitedTags);
+            } else entries.add(s);
         }
-        return actualTags;
     }
 
     //neoforge only. on fabric burn times are registered in code instead
@@ -155,7 +156,8 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
     }
 
     private void addBlocksLootTable(ResourceManager manager, ResourceSink sink) {
-        String templateName = VSC.USE_EVS_BLOCKS ? "template/loot_table_evs.json" : "template/loot_table.json";
+        String templateName = VSC.USE_EVS_BLOCKS ? "template/loot_table_evs.json"
+                : VSC.USE_BA_BLOCKS ? "template/loot_table_ba.json" : "template/loot_table.json";
         var template = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res(templateName)));
 
         VSC.VERTICAL_SLABS.forEach((w, block) -> {

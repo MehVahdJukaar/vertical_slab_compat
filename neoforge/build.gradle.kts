@@ -17,6 +17,7 @@ dependencies {
     modCompileOnly("curse.maven:quark-243121:${quark_file_id}")
     modCompileOnly("org.violetmoon.zeta:Zeta:${zeta_version}")
     modCompileOnly("curse.maven:enchanted-vertical-slabs-559148:6796088")
+    modCompileOnly("curse.maven:buildersaddition-389697:8155184")
 
     //TMP modRuntimeOnly("curse.maven:quark-243121:${quark_file_id}")
     //TMP modRuntimeOnly("curse.maven:zeta-968868:7980010") // v1.1-40

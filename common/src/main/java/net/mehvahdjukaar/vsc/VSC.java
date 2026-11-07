@@ -36,6 +36,8 @@ public class VSC {
     public static final boolean EVS = PlatHelper.isModLoaded("evs");
     //quark wins when both are on
     public static final boolean USE_EVS_BLOCKS = EVS && !QUARK;
+    public static final boolean BUILDERS_ADDITION = PlatHelper.isModLoaded("buildersaddition2");
+    public static final boolean USE_BA_BLOCKS = BUILDERS_ADDITION && !QUARK && !EVS;
 
     //same value quark uses for its own wooden vertical slabs
     public static final int WOOD_BURN_TIME = 150;

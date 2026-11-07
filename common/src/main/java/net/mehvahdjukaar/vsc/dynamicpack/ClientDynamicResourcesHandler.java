@@ -39,9 +39,11 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
     @Override
     protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
         executor.accept((manager, sink) -> {
-            String blockStateTemplate = VSC.USE_EVS_BLOCKS ? "template/blockstate_evs.json" : "template/blockstate.json";
+            String blockStateTemplate = VSC.USE_EVS_BLOCKS ? "template/blockstate_evs.json"
+                    : VSC.USE_BA_BLOCKS ? "template/blockstate_ba.json" : "template/blockstate.json";
             var blockState = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res(blockStateTemplate)));
-            var blockModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/block_model.json")));
+            String blockModelTemplate = VSC.USE_BA_BLOCKS ? "template/block_model_ba.json" : "template/block_model.json";
+            var blockModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res(blockModelTemplate)));
             var itemModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/item_model.json")));
             for (var e : VSC.VERTICAL_SLABS.entrySet()) {
                 try {
@@ -100,7 +102,7 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
     @Override
     protected void addDynamicTranslations(AfterLanguageLoadEvent lang) {
         VSC.VERTICAL_SLABS.forEach((w, b) ->
-                LangBuilder.addDynamicEntry(lang, "block_type.v_slab_compat.vertical_slab", w, b));
+                LangBuilder.addDynamicEntry(lang, VSC.USE_BA_BLOCKS ? "block_type.v_slab_compat.panel" : "block_type.v_slab_compat.vertical_slab", w, b));
     }
 
 }

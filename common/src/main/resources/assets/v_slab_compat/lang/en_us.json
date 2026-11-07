@@ -1,3 +1,4 @@
 {
-  "block_type.v_slab_compat.vertical_slab": "%s Vertical Slab"
+  "block_type.v_slab_compat.vertical_slab": "%s Vertical Slab",
+  "block_type.v_slab_compat.panel": "%s Panel"
 }
