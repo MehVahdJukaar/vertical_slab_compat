@@ -1,4 +1,5 @@
-- fixes #49 
+- When no mod that adds vslab is on this mod will still function, for vanilla too.
+- fixes #49
 - fixes #48 
 - fixes #47 
 - fixes #19
