@@ -1,14 +1,3 @@
 - When no mod that adds vslab is on this mod will still function, for vanilla too.
 - added compat for Enhanced Vertical Slabs and Builders Additions
-- fixes #49
-- fixes #48 
-- fixes #47 
-- fixes #19
-- fixes #9
-- fixes #23
-- fixes #22
-- fixes #21 
-- fixes #16
-- fixes #15
-- fixes #14
-- fixes #13
+- Fixes many issues related with slab detection, looks or drops (some very old ones too)

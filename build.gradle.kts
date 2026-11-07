@@ -46,12 +46,18 @@ subprojects {
             dependencies {
                 required("selene")
                 optional("quark")
+                optional("enchanted-vertical-slabs")
+                optional("every-compat")
+                if (project.name == "neoforge") optional("buildersaddition")
             }
         }
         modrinth {
             dependencies {
                 required("moonlight")
                 optional("quark")
+                optional("enchanted-vertical-slabs")
+                optional("every-compat")
+                if (project.name == "neoforge") optional("buildersaddition")
             }
         }
 
