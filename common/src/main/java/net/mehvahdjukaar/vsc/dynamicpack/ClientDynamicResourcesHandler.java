@@ -45,7 +45,7 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
             for (var e : VSC.VERTICAL_SLABS.entrySet()) {
                 try {
                     var type = e.getKey();
-                    var texture = RPUtils.findFirstBlockTextureLocation(manager, type.slab);
+                    var texture = findSlabTexture(manager, type.slab);
                     var blockModelLocation = findFirstBlockModel(manager, type.base);
                     ResourceLocation id = Utils.getID(e.getValue());
                     String modelId = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "block/" + id.getPath()).toString();
@@ -70,6 +70,15 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
         });
     }
 
+
+    private static ResourceLocation findSlabTexture(ResourceManager manager, Block slab) throws FileNotFoundException {
+        try {
+            //smoothstone like slabs have a side texture that looks like two slabs stacked
+            return RPUtils.findFirstBlockTextureLocation(manager, slab, t -> !t.endsWith("slab_side"));
+        } catch (FileNotFoundException e) {
+            return RPUtils.findFirstBlockTextureLocation(manager, slab);
+        }
+    }
 
     public static ResourceLocation findFirstBlockModel(ResourceManager manager, Block block) throws FileNotFoundException {
 

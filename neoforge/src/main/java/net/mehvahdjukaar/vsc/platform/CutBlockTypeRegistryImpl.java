@@ -4,29 +4,24 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SlabBlock;
-import net.minecraft.world.level.block.WeatheringCopperSlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 public class CutBlockTypeRegistryImpl {
 
     public static boolean hasRightShapeHack(Block block) {
-        var c = block.getClass();
-        if (c != SlabBlock.class && c != WeatheringCopperSlabBlock.class) {
-            try {
-                var m = ObfuscationReflectionHelper.findMethod(c, "getShape",
-                        BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class);
-                if (m.getDeclaringClass() != SlabBlock.class) return false;
-            } catch (Exception ignored) {
-            }
-            try {
-                var m = ObfuscationReflectionHelper.findMethod(c, "getCollisionShape",
-                        BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class);
-                if (m.getDeclaringClass() != SlabBlock.class) return false;
-            } catch (Exception ignored) {
-            }
+        for (Class<?> c = block.getClass(); c != SlabBlock.class; c = c.getSuperclass()) {
+            if (overridesShape(c, "getShape") || overridesShape(c, "getCollisionShape")) return false;
         }
         return true;
+    }
+
+    private static boolean overridesShape(Class<?> c, String name) {
+        try {
+            c.getDeclaredMethod(name, BlockState.class, BlockGetter.class, BlockPos.class, CollisionContext.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 }

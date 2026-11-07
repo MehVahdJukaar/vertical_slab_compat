@@ -1,10 +1,9 @@
 plugins {
-    id("com.possible-triangle.core")
-    id("com.possible-triangle.common") apply false
-    id("com.possible-triangle.fabric") apply false
-    id("com.possible-triangle.neoforge") apply false
-    id("net.mehvahdjukaar.candlelight") version "1.2.6" apply false
-    id("dev.mixinmcp.decompile") version "1.3.0" apply false
+    id("com.possible-triangle.core") version "1.4.259"
+    id("com.possible-triangle.common") version "1.4.259" apply false
+    id("com.possible-triangle.fabric") version "1.4.259" apply false
+    id("com.possible-triangle.neoforge") version "1.4.259" apply false
+    id("net.mehvahdjukaar.candlelight") version "1.2.4" apply false
 }
 
 mod {
@@ -22,7 +21,6 @@ subprojects {
 
     apply(plugin = "com.possible-triangle.core")
     apply(plugin = "net.mehvahdjukaar.candlelight")
-    apply(plugin = "dev.mixinmcp.decompile")
     apply(plugin = "maven-publish")
 
     dependencies {

@@ -11,6 +11,8 @@ public class VSCImpl {
 
     public static Block createVSlab(CutBlockType type) {
         var properties = Utils.copyPropertySafe(type.base);
-        return VSC.QUARK ? new CompatVerticalSlab(properties, type) : new TempVerticalSlabBlock(properties, type);
+        //has togo through a method returning Block or the verifier loads quark classes...
+        if (VSC.QUARK) return CompatVerticalSlab.create(properties, type);
+        return new TempVerticalSlabBlock(properties, type);
     }
 }

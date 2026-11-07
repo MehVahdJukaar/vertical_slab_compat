@@ -1,1 +1,12 @@
-quick 1.21.1
+- fixes #49 
+- fixes #48 
+- fixes #47 
+- fixes #19
+- fixes #9
+- fixes #23
+- fixes #22
+- fixes #21 
+- fixes #16
+- fixes #15
+- fixes #14
+- fixes #13

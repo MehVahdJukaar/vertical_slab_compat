@@ -15,11 +15,8 @@ dependencies {
     accessTransformers("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
 
     modCompileOnly("curse.maven:quark-243121:${quark_file_id}")
-    // quark ships without zeta, but VerticalSlabBlock implements its interfaces
     modCompileOnly("org.violetmoon.zeta:Zeta:${zeta_version}")
 
-    // dev run only. quark (+ its deps) so the quark slab path runs, plus a mod with plain
-    // slabs and no vertical ones so there is actually something to generate
     modRuntimeOnly("curse.maven:quark-243121:${quark_file_id}")
     modRuntimeOnly("curse.maven:zeta-968868:7980010") // v1.1-40
     modRuntimeOnly("curse.maven:biolith-852512:7074761") // v3.0.10

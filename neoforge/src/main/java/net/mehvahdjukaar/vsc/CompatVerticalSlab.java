@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -21,6 +22,10 @@ public class CompatVerticalSlab extends VerticalSlabBlock {
         super(() -> type.base, properties);
         this.blockType = type;
         this.mimic = blockType.slab.defaultBlockState();
+    }
+
+    public static Block create(Properties properties, CutBlockType type) {
+        return new CompatVerticalSlab(properties, type);
     }
 
     public CutBlockType getBlockType() {

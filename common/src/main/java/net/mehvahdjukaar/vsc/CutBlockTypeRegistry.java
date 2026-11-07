@@ -85,8 +85,12 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
 
     @Override
     public void addTypeTranslations(AfterLanguageLoadEvent language) {
-        this.getValues().forEach((w) -> {
-            if (language.isDefault()) language.addEntry(w.getTranslationKey(), w.getReadableName());
-        });
+        if (!language.isDefault()) return;
+        for (var w : this.getValues()) {
+            String slabName = language.getEntry(w.slab.getDescriptionId());
+            if (slabName != null && slabName.endsWith(" Slab")) {
+                language.addEntry(w.getTranslationKey(), slabName.substring(0, slabName.length() - " Slab".length()));
+            } else language.addEntry(w.getTranslationKey(), w.getReadableName());
+        }
     }
 }

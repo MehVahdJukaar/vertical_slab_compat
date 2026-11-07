@@ -44,7 +44,9 @@ public class CutBlockType extends BlockType {
         this.addChild("slab", slab);
         List<String> list = new ArrayList<>();
         list.add(this.id.getNamespace());
-        list.addAll(VSC.VERTICAL_SLABS_MODS);
+        boolean clashesWithVanilla = !id.getNamespace().equals("minecraft") &&
+                BuiltInRegistries.BLOCK.containsKey(ResourceLocation.withDefaultNamespace(this.getTypeName() + "_slab"));
+        if (!clashesWithVanilla) list.addAll(VSC.VERTICAL_SLABS_MODS);
         boolean first = true;
         for (var s : list) {
             var o = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(s, this.getTypeName() + "_vertical_slab"));
