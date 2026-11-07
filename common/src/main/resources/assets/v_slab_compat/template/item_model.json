@@ -1,3 +1,6 @@
 {
-  "parent": "$v_slab"
+  "model": {
+    "type": "minecraft:model",
+    "model": "$v_slab"
+  }
 }

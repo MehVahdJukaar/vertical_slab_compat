@@ -6,9 +6,7 @@
     " 1 "
   ],
   "key": {
-    "1": {
-      "item": "$slab"
-    }
+    "1": "$slab"
   },
   "result": {
     "id": "$v_slab",

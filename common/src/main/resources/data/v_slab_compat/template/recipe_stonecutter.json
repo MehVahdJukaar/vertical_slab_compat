@@ -1,8 +1,6 @@
 {
   "type": "minecraft:stonecutting",
-  "ingredient": {
-    "item": "$block"
-  },
+  "ingredient": "$block",
   "result": {
     "id": "$v_slab",
     "count": 2

@@ -16,7 +16,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -70,8 +70,8 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
         tag.addEntries(VSC.VERTICAL_SLABS_ITEMS.values());
         sink.addTag(tag, Registries.BLOCK);
         sink.addTag(tag, Registries.ITEM);
-        SimpleTagBuilder quarkTag = SimpleTagBuilder.of(ResourceLocation.parse("quark:vertical_slabs"));
-        SimpleTagBuilder quarkWoodenTag = SimpleTagBuilder.of(ResourceLocation.parse("quark:wooden_vertical_slabs"));
+        SimpleTagBuilder quarkTag = SimpleTagBuilder.of(Identifier.parse("quark:vertical_slabs"));
+        SimpleTagBuilder quarkWoodenTag = SimpleTagBuilder.of(Identifier.parse("quark:wooden_vertical_slabs"));
         quarkTag.addTag(tag);
         quarkWoodenTag.addEntries(woodenSlabItems());
         sink.addTag(quarkTag, Registries.BLOCK);
@@ -79,7 +79,7 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
         sink.addTag(quarkWoodenTag, Registries.BLOCK);
         sink.addTag(quarkWoodenTag, Registries.ITEM);
         if (VSC.EVS) {
-            SimpleTagBuilder evsTag = SimpleTagBuilder.of(ResourceLocation.parse("enchanted-vertical-slabs:slabs"));
+            SimpleTagBuilder evsTag = SimpleTagBuilder.of(Identifier.parse("enchanted-vertical-slabs:slabs"));
             evsTag.addTag(tag);
             sink.addTag(evsTag, Registries.BLOCK);
         }
@@ -102,7 +102,7 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
 
         SimpleTagBuilder builder = SimpleTagBuilder.of(tagKey);
         for (var e : VSC.VERTICAL_SLABS_ITEMS.entrySet()) {
-            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(e.getKey().slab);
+            Identifier id = BuiltInRegistries.BLOCK.getKey(e.getKey().slab);
             if (tagValues.contains(id.toString())) {
                 builder.addEntry(e.getValue());
             }
@@ -119,7 +119,8 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
         return actualTags;
     }
 
-    private static <T> void collectTagEntries(ResourceManager manager, TagKey<T> tagKey, Set<String> entries, Set<ResourceLocation> visitedTags) {
+
+    private static <T> void collectTagEntries(ResourceManager manager, TagKey<T> tagKey, Set<String> entries, Set<Identifier> visitedTags) {
         if (!visitedTags.add(tagKey.location())) return;
         Set<String> tagValues = new HashSet<>();
         for (var r : manager.getResourceStack(ResType.getTagPath(tagKey))) {
@@ -135,12 +136,12 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
         }
         for (var s : tagValues) {
             if (s.startsWith("#")) {
-                collectTagEntries(manager, TagKey.create(tagKey.registry(), ResourceLocation.parse(s.substring(1))), entries, visitedTags);
+                collectTagEntries(manager, TagKey.create(tagKey.registry(), Identifier.parse(s.substring(1))), entries, visitedTags);
             } else entries.add(s);
         }
     }
 
-    //neoforge only. on fabric burn times are registered in code instead
+    //moonlight reads this on fabric too
     private void addFurnaceFuels(ResourceSink sink) {
         JsonObject values = new JsonObject();
         for (var i : woodenSlabItems()) {
@@ -150,8 +151,9 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
         }
         if (values.size() == 0) return;
         JsonObject json = new JsonObject();
+        json.addProperty("moonlight_parse_on_fabric", true);
         json.add("values", values);
-        sink.addJson(ResourceLocation.fromNamespaceAndPath("neoforge", "data_maps/item/furnace_fuels"),
+        sink.addJson(Identifier.fromNamespaceAndPath("neoforge", "data_maps/item/furnace_fuels"),
                 json, ResType.JSON);
     }
 
@@ -162,7 +164,8 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
 
         VSC.VERTICAL_SLABS.forEach((w, block) -> {
             String fullText = template.asString().replace("$v_slab", Utils.getID(block).toString());
-            sink.addBytes(block.getLootTable().location(), fullText.getBytes(StandardCharsets.UTF_8), ResType.LOOT_TABLES);
+            block.getLootTable().ifPresent(key ->
+                    sink.addBytes(key.identifier(), fullText.getBytes(StandardCharsets.UTF_8), ResType.LOOT_TABLES));
         });
     }
 

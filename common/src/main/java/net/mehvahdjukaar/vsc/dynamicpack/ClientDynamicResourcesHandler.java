@@ -11,7 +11,7 @@ import net.mehvahdjukaar.moonlight.api.resources.pack.PackGenerationStrategy;
 import net.mehvahdjukaar.moonlight.api.resources.pack.ResourceGenTask;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.VSC;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.Block;
 
@@ -50,8 +50,8 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
                     var type = e.getKey();
                     var texture = findSlabTexture(manager, type.slab);
                     var blockModelLocation = findFirstBlockModel(manager, type.base);
-                    ResourceLocation id = Utils.getID(e.getValue());
-                    String modelId = ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "block/" + id.getPath()).toString();
+                    Identifier id = Utils.getID(e.getValue());
+                    String modelId = Identifier.fromNamespaceAndPath(id.getNamespace(), "block/" + id.getPath()).toString();
 
                     sink.addBytes(id, blockModel.asString()
                             .replace("$texture", texture.toString())
@@ -64,7 +64,7 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
 
                     sink.addBytes(id, itemModel.asString()
                             .replace("$v_slab", modelId)
-                            .getBytes(StandardCharsets.UTF_8), ResType.ITEM_MODELS);
+                            .getBytes(StandardCharsets.UTF_8), ResType.ITEMS);
 
                 } catch (Exception ex) {
                     VSC.LOGGER.error("Failed to generate assets for {}", e.getValue(), ex);
@@ -74,7 +74,7 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
     }
 
 
-    private static ResourceLocation findSlabTexture(ResourceManager manager, Block slab) throws FileNotFoundException {
+    private static Identifier findSlabTexture(ResourceManager manager, Block slab) throws FileNotFoundException {
         try {
             //smoothstone like slabs have a side texture that looks like two slabs stacked
             return RPUtils.findFirstBlockTextureLocation(manager, slab, t -> !t.endsWith("slab_side"));
@@ -83,15 +83,15 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
         }
     }
 
-    public static ResourceLocation findFirstBlockModel(ResourceManager manager, Block block) throws FileNotFoundException {
+    public static Identifier findFirstBlockModel(ResourceManager manager, Block block) throws FileNotFoundException {
 
-        ResourceLocation res = Utils.getID(block);
+        Identifier res = Utils.getID(block);
         var blockState = manager.getResource(ResType.BLOCKSTATES.getPath(res));
         try (var bsStream = blockState.get().open()) {
             JsonElement bsElement = RPUtils.deserializeJson(bsStream);
 
             //grabs the first resource location of a model
-            return ResourceLocation.parse(RPUtils.findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
+            return Identifier.parse(RPUtils.findAllResourcesInJsonRecursive(bsElement.getAsJsonObject(), s -> s.equals("model"))
                     .stream().findAny().get());
 
         } catch (Exception ignored) {

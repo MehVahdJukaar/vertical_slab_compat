@@ -5,7 +5,7 @@ import net.mehvahdjukaar.candlelight.api.PlatformImpl;
 import net.mehvahdjukaar.moonlight.api.events.AfterLanguageLoadEvent;
 import net.mehvahdjukaar.moonlight.api.set.BlockTypeRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -15,7 +15,7 @@ import java.util.*;
 
 public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
     public static final CutBlockType STONE_TYPE = new CutBlockType(
-            ResourceLocation.withDefaultNamespace("stone"), Blocks.STONE, Blocks.STONE_SLAB);
+            Identifier.withDefaultNamespace("stone"), Blocks.STONE, Blocks.STONE_SLAB);
 
     protected CutBlockTypeRegistry(String name) {
         super(CutBlockType.class, name);
@@ -32,7 +32,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
     private final Set<String> blacklist = Set.of("securitycraft", "betterend", "betternether");
 
     @Override
-    protected Optional<CutBlockType> detectTypeFromBlock(Block block, ResourceLocation baseRes) {
+    protected Optional<CutBlockType> detectTypeFromBlock(Block block, Identifier baseRes) {
         String name = null;
         String path = baseRes.getPath();
         if (path.endsWith("_slab") && !path.endsWith("_vertical_slab")) {
@@ -42,7 +42,7 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
         }
         String namespace = baseRes.getNamespace();
         if (name != null && block instanceof SlabBlock && !blacklist.contains(namespace)) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace, name);
+            Identifier id = Identifier.fromNamespaceAndPath(namespace, name);
             var parent = BuiltInRegistries.BLOCK.getOptional(id);
 
             if (parent.isEmpty() && namespace.equals("absentbydesign")) {
@@ -50,8 +50,8 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
                 for (var d : dyes) {
                     if (finalName.contains(d)) {
                         var n = d + "_" + finalName.replace("_" + d, "");
-                        parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(n));
-                        if (parent.isPresent()) id = ResourceLocation.fromNamespaceAndPath("absentbydesign", n);
+                        parent = BuiltInRegistries.BLOCK.getOptional(Identifier.withDefaultNamespace(n));
+                        if (parent.isPresent()) id = Identifier.fromNamespaceAndPath("absentbydesign", n);
                         break;
                     }
                 }
@@ -59,14 +59,14 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
 
             }
             if (parent.isEmpty())
-                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, name + "s"));
+                parent = BuiltInRegistries.BLOCK.getOptional(Identifier.fromNamespaceAndPath(namespace, name + "s"));
             if (parent.isEmpty())
-                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, name + "_planks"));
+                parent = BuiltInRegistries.BLOCK.getOptional(Identifier.fromNamespaceAndPath(namespace, name + "_planks"));
             //snow -> snow_block, not the layer
             if (parent.isEmpty())
-                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(name + "_block"));
+                parent = BuiltInRegistries.BLOCK.getOptional(Identifier.withDefaultNamespace(name + "_block"));
             if (parent.isEmpty())
-                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(name));
+                parent = BuiltInRegistries.BLOCK.getOptional(Identifier.withDefaultNamespace(name));
             if (parent.isPresent() && hasRightShapeHack(block)) {
                 return Optional.of(new CutBlockType(id, parent.get(), block));
             }

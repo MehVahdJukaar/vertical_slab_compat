@@ -3,14 +3,14 @@ plugins {
 }
 
 common {
-    neoformVersion = "1.21.1-20240808.144430"
+    neoformVersion = "26.1.2-1"
 }
 
 val moonlight_version: String by extra
 
 dependencies {
-    modCompileOnly("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}@jar")
-    accessTransformers("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+    modCompileOnly("net.mehvahdjukaar:moonlight-common:${moonlight_version}") { isTransitive = false }
+    accessTransformers("net.mehvahdjukaar:moonlight-common:${moonlight_version}")
 
-    modCompileOnly("curse.maven:enchanted-vertical-slabs-559148:6796088")
+    modCompileOnly("maven.modrinth:enchanted-vertical-slabs:EUlKZFNN")
 }

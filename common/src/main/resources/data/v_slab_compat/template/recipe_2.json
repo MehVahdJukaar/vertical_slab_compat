@@ -1,9 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "$v_slab"
-    }
+    "$v_slab"
   ],
   "result": {
     "id": "$slab",

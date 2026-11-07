@@ -12,11 +12,14 @@ import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.dynamicpack.ServerDynamicResourcesHandler;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,8 +45,8 @@ public class VSC {
     //same value quark uses for its own wooden vertical slabs
     public static final int WOOD_BURN_TIME = 150;
 
-    public static ResourceLocation res(String name) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
+    public static Identifier res(String name) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, name);
     }
 
     public static final boolean EVERYCOMP = PlatHelper.isModLoaded("everycomp");
@@ -82,16 +85,17 @@ public class VSC {
         for (var v : VERTICAL_SLABS.entrySet()) {
             var type = v.getKey();
             var block = v.getValue();
+            Identifier id = Utils.getID(block);
             Item i;
-            var prop = new Item.Properties();
+            var prop = new Item.Properties()
+                    .setId(ResourceKey.create(Registries.ITEM, id))
+                    .useBlockDescriptionPrefix();
             if (type.getWoodType() != null) {
                 i = new WoodBasedBlockItem(block, prop, type.getWoodType());
-                //only does anything on fabric. neoforge reads the furnace fuel data map the server pack writes
-                RegHelper.registerItemBurnTime(i, WOOD_BURN_TIME);
             } else {
                 i = new BlockItem(block, prop);
             }
-            itemRegistrator.register(Utils.getID(block), i);
+            itemRegistrator.register(id, i);
             VERTICAL_SLABS_ITEMS.put(type, i);
         }
     }
@@ -100,9 +104,11 @@ public class VSC {
         for (var type : BlockSetAPI.getBlockSet(CutBlockType.class).getValues()) {
             if (type.getChild("vertical_slab") != null) continue;
             String name = type.getTypeName() + "_vertical_slab";
-            ResourceLocation newId = res(type.getNamespace().equals("minecraft") ? name : type.getNamespace() + "/" + name);
+            Identifier newId = res(type.getNamespace().equals("minecraft") ? name : type.getNamespace() + "/" + name);
 
-            Block block = createVSlab(type);
+            var properties = Utils.copyPropertySafe(type.base)
+                    .setId(ResourceKey.create(Registries.BLOCK, newId));
+            Block block = createVSlab(type, properties);
             blockRegistrator.register(newId, block);
             VERTICAL_SLABS.put(type, block);
             type.addChild("vertical_slab", block);
@@ -110,7 +116,7 @@ public class VSC {
     }
 
     @PlatformImpl
-    public static Block createVSlab(CutBlockType type) {
+    public static Block createVSlab(CutBlockType type, BlockBehaviour.Properties properties) {
         throw new AssertionError();
     }
 
