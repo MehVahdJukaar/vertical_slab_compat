@@ -3,6 +3,7 @@ package net.mehvahdjukaar.vsc;
 import net.mehvahdjukaar.moonlight.api.set.BlockSetAPI;
 import net.mehvahdjukaar.moonlight.api.set.BlockType;
 import net.mehvahdjukaar.moonlight.api.set.wood.WoodType;
+import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ItemLike;
@@ -42,28 +43,39 @@ public class CutBlockType extends BlockType {
     protected void initializeChildrenBlocks() {
         this.addChild("base", base);
         this.addChild("slab", slab);
-        List<String> list = new ArrayList<>();
-        list.add(this.id.getNamespace());
-        boolean clashesWithVanilla = !id.getNamespace().equals("minecraft") &&
-                BuiltInRegistries.BLOCK.containsKey(ResourceLocation.withDefaultNamespace(this.getTypeName() + "_slab"));
-        if (!clashesWithVanilla) list.addAll(VSC.VERTICAL_SLABS_MODS);
-        boolean first = true;
-        for (var s : list) {
-            var o = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(s, this.getTypeName() + "_vertical_slab"));
+        for (var res : getVerticalSlabCandidates()) {
+            var o = BuiltInRegistries.BLOCK.getOptional(res);
             if (o.isPresent()) {
                 this.addChild("vertical_slab", o.get());
                 break;
             }
-            if (first) {
-                o = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(s, this.getTypeName() + "_slab_vert"));
-                if (o.isPresent()) {
-                    this.addChild("vertical_slab", o.get());
-                    break;
-                }
-            }
-            first = false;
         }
 
+    }
+
+    private List<ResourceLocation> getVerticalSlabCandidates() {
+        String name = this.getTypeName();
+        String namespace = this.getNamespace();
+        List<ResourceLocation> list = new ArrayList<>();
+        list.add(ResourceLocation.fromNamespaceAndPath(namespace, name + "_vertical_slab"));
+        list.add(ResourceLocation.fromNamespaceAndPath(namespace, name + "_slab_vert"));
+
+        boolean clashesWithVanilla = !namespace.equals("minecraft") &&
+                BuiltInRegistries.BLOCK.containsKey(ResourceLocation.withDefaultNamespace(name + "_slab"));
+        if (clashesWithVanilla) return list;
+        for (var mod : VSC.VERTICAL_SLABS_MODS) {
+            list.add(ResourceLocation.fromNamespaceAndPath(mod, name + "_vertical_slab"));
+        }
+        if (VSC.EVERYCOMP) {
+            list.add(ResourceLocation.fromNamespaceAndPath("everycomp", "q/" + namespace + "/" + name + "_vertical_slab"));
+        }
+        ResourceLocation slabId = Utils.getID(slab);
+        if (slabId.getNamespace().equals("minecraft")) {
+            list.add(ResourceLocation.fromNamespaceAndPath("enchanted-vertical-slabs", "vertical_" + slabId.getPath()));
+        }
+        //we treat BA ones as vertical slabs enve tho they are called panels. low priprity
+        list.add(ResourceLocation.fromNamespaceAndPath("buildersaddition2", name + "_panel"));
+        return list;
     }
 
     @Nullable

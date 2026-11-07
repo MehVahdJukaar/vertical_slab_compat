@@ -3,6 +3,7 @@ package net.mehvahdjukaar.vsc.platform;
 import net.mehvahdjukaar.moonlight.api.util.Utils;
 import net.mehvahdjukaar.vsc.CompatVerticalSlab;
 import net.mehvahdjukaar.vsc.CutBlockType;
+import net.mehvahdjukaar.vsc.EVSCompat;
 import net.mehvahdjukaar.vsc.VSC;
 import net.mehvahdjukaar.vsc.temp.TempVerticalSlabBlock;
 import net.minecraft.world.level.block.Block;
@@ -13,6 +14,7 @@ public class VSCImpl {
         var properties = Utils.copyPropertySafe(type.base);
         //has togo through a method returning Block or the verifier loads quark classes...
         if (VSC.QUARK) return CompatVerticalSlab.create(properties, type);
+        if (VSC.USE_EVS_BLOCKS) return EVSCompat.createVSlab(properties);
         return new TempVerticalSlabBlock(properties, type);
     }
 }

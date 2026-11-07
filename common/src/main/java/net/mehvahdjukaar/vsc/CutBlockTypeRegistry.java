@@ -62,6 +62,9 @@ public class CutBlockTypeRegistry extends BlockTypeRegistry<CutBlockType> {
                 parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, name + "s"));
             if (parent.isEmpty())
                 parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.fromNamespaceAndPath(namespace, name + "_planks"));
+            //snow -> snow_block, not the layer
+            if (parent.isEmpty())
+                parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(name + "_block"));
             if (parent.isEmpty())
                 parent = BuiltInRegistries.BLOCK.getOptional(ResourceLocation.withDefaultNamespace(name));
             if (parent.isPresent() && hasRightShapeHack(block)) {

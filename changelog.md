@@ -1,4 +1,5 @@
 - When no mod that adds vslab is on this mod will still function, for vanilla too.
+- added compat for EVS
 - fixes #49
 - fixes #48 
 - fixes #47 

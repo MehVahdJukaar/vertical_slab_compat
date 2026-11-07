@@ -11,4 +11,6 @@ val moonlight_version: String by extra
 dependencies {
     modCompileOnly("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}@jar")
     accessTransformers("net.mehvahdjukaar:moonlight-neoforge:${moonlight_version}")
+
+    modCompileOnly("curse.maven:enchanted-vertical-slabs-559148:6796088")
 }

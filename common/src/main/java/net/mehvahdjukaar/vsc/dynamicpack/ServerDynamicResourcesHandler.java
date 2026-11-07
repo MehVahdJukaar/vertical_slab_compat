@@ -46,7 +46,7 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
     @Override
     protected Collection<String> gatherSupportedNamespaces() {
         //minecraft and quark for the tags we copy into, neoforge for the furnace fuel data map
-        return List.of("minecraft", "quark", "neoforge");
+        return List.of("minecraft", "quark", "neoforge", "enchanted-vertical-slabs");
     }
 
     @Override
@@ -79,6 +79,11 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
         sink.addTag(quarkTag, Registries.ITEM);
         sink.addTag(quarkWoodenTag, Registries.BLOCK);
         sink.addTag(quarkWoodenTag, Registries.ITEM);
+        if (VSC.EVS) {
+            SimpleTagBuilder evsTag = SimpleTagBuilder.of(ResourceLocation.parse("enchanted-vertical-slabs:slabs"));
+            evsTag.addTag(tag);
+            sink.addTag(evsTag, Registries.BLOCK);
+        }
 
         copyTags(manager, sink, BlockTags.NEEDS_STONE_TOOL, Registries.BLOCK);
         copyTags(manager, sink, BlockTags.NEEDS_IRON_TOOL, Registries.BLOCK);
@@ -150,7 +155,8 @@ public class ServerDynamicResourcesHandler extends DynamicServerResourceProvider
     }
 
     private void addBlocksLootTable(ResourceManager manager, ResourceSink sink) {
-        var template = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/loot_table.json")));
+        String templateName = VSC.USE_EVS_BLOCKS ? "template/loot_table_evs.json" : "template/loot_table.json";
+        var template = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res(templateName)));
 
         VSC.VERTICAL_SLABS.forEach((w, block) -> {
             String fullText = template.asString().replace("$v_slab", Utils.getID(block).toString());

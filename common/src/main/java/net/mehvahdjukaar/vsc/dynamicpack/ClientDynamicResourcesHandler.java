@@ -39,7 +39,8 @@ public class ClientDynamicResourcesHandler extends DynamicClientResourceProvider
     @Override
     protected void regenerateDynamicAssets(Consumer<ResourceGenTask> executor) {
         executor.accept((manager, sink) -> {
-            var blockState = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/blockstate.json")));
+            String blockStateTemplate = VSC.USE_EVS_BLOCKS ? "template/blockstate_evs.json" : "template/blockstate.json";
+            var blockState = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res(blockStateTemplate)));
             var blockModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/block_model.json")));
             var itemModel = StaticResource.getOrThrow(manager, ResType.GENERIC.getPath(VSC.res("template/item_model.json")));
             for (var e : VSC.VERTICAL_SLABS.entrySet()) {

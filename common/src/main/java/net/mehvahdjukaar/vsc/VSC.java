@@ -33,6 +33,9 @@ public class VSC {
     public static final String MOD_ID = "v_slab_compat";
     public static final Logger LOGGER = LogManager.getLogger();
     public static final boolean QUARK = PlatHelper.isModLoaded("quark");
+    public static final boolean EVS = PlatHelper.isModLoaded("evs");
+    //quark wins when both are on
+    public static final boolean USE_EVS_BLOCKS = EVS && !QUARK;
 
     //same value quark uses for its own wooden vertical slabs
     public static final int WOOD_BURN_TIME = 150;
@@ -41,7 +44,9 @@ public class VSC {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, name);
     }
 
-    public static final List<String> VERTICAL_SLABS_MODS = Stream.of("quark", "buildersaddition", "compatoplenty", "everycomp")
+    public static final boolean EVERYCOMP = PlatHelper.isModLoaded("everycomp");
+
+    public static final List<String> VERTICAL_SLABS_MODS = Stream.of("quark", "buildersaddition", "compatoplenty")
             .filter(PlatHelper::isModLoaded).toList();
 
 
