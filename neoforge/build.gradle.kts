@@ -23,6 +23,6 @@ dependencies {
     //modRuntimeOnly("curse.maven:buildersaddition-389697:8155184") // v2.1.2
     modRuntimeOnly("maven.modrinth:absent-by-design:Ydkgd65V") // v1.9.2, adds a pile of slabs
     modRuntimeOnly("maven.modrinth:flib:uMEW9ig6") // v0.2.11, absent by design dep
-    //TMP modRuntimeOnly("maven.modrinth:enchanted-vertical-slabs:EUlKZFNN") // v2.6.6, vanilla vertical slabs
+    modRuntimeOnly("maven.modrinth:enchanted-vertical-slabs:EUlKZFNN") // v2.6.6, vanilla vertical slabs
     //modRuntimeOnly("curse.maven:architects-palette-433862:6861008") // v1.4.0-beta.5, own vertical slabs
 }

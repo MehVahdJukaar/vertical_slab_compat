@@ -1,4 +1,7 @@
 {
   "block_type.v_slab_compat.vertical_slab": "%s Vertical Slab",
-  "block_type.v_slab_compat.panel": "%s Panel"
+  "block_type.v_slab_compat.panel": "%s Panel",
+  "v_slab_compat.configuration.general": "General",
+  "v_slab_compat.configuration.general.blacklist": "Blacklist",
+  "v_slab_compat.configuration.general.blacklist.description": "mod ids blacklist"
 }
